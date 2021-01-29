@@ -39,10 +39,11 @@ class CpuData:
         self.load = {"1min": cpu_load[0],
                          "5min": cpu_load[1],
                          "15min": cpu_load[2]}
-        self.temp = ps.sensors_temperatures()["cpu_thermal"][0].current
+        if ps.LINUX: # not available on windows.
+            self.temp = ps.sensors_temperatures()["cpu_thermal"][0].current
 
     def _get_cpu_load(self):
-        return [x / ps.cpu_count()*100 for x in os.getloadavg()]
+        return [x / ps.cpu_count()*100 for x in ps.getloadavg()]
 
 @dataclass
 class TimeDeconstruct:
@@ -161,12 +162,13 @@ class VirtualMemoryData(MemoryDataBaseClass):
         self.percent = virtual.percent
         self.used = self._round_data(virtual.used)
         self.free = self._round_data(virtual.free)
-        self.active = self._round_data(virtual.active)
-        self.inactive = self._round_data(virtual.inactive)
-        self.buffers = self._round_data(virtual.buffers)
-        self.cached = self._round_data(virtual.cached)
-        self.shared = self._round_data(virtual.shared)
-        self.slab = self._round_data(virtual.slab)
+        if ps.LINUX: # not supported in windows
+            self.active = self._round_data(virtual.active)
+            self.inactive = self._round_data(virtual.inactive)
+            self.buffers = self._round_data(virtual.buffers)
+            self.cached = self._round_data(virtual.cached)
+            self.shared = self._round_data(virtual.shared)
+            self.slab = self._round_data(virtual.slab)
     
     def _get_memory_data(self):
         return ps.virtual_memory()
@@ -641,6 +643,7 @@ class PiMonitor:
         while not self._Event.is_set():
                 qobj = js.dumps(self._dataQueue.get(block=True))
                 self._payloadQueue.put(qobj, block=True)
+                # print(self._payloadQueue.qsize())
 
     def send(self, broker_parameters: pika.ConnectionParameters):
         while not self._Event.is_set():
@@ -671,8 +674,15 @@ broker_cred = pika.PlainCredentials(username="ubuntu", password = "mariage23muri
 broker_url = "192.168.178.200"
 broker_param = pika.ConnectionParameters(host=broker_url, port = 5672, virtual_host="/", credentials = broker_cred)
 
-monitor = PiMonitor(basic=True, publish_interval=1/40)
+network_iface = netifaces.gateways()[netifaces.AF_INET][0][1]
+
+monitor = PiMonitor(basic=True,
+                    publish_interval=1/100,
+                    monitor_iface=network_iface,
+                    send_iface=network_iface, config = ("platform", "cpu", "timestamp", "uptime"))
 
 monitor.start(broker_parameters=broker_param)
+
+
 
 
