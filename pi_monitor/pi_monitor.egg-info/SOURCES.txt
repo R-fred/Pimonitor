@@ -1,8 +1,0 @@
-README.txt
-setup.py
-pi_monitor/__init__.py
-pi_monitor.egg-info/PKG-INFO
-pi_monitor.egg-info/SOURCES.txt
-pi_monitor.egg-info/dependency_links.txt
-pi_monitor.egg-info/not-zip-safe
-pi_monitor.egg-info/top_level.txt
