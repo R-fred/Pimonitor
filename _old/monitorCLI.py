@@ -3,7 +3,7 @@ import argparse
 import logging
 
 import pika
-from PiMonitor import PiMonitor
+from .PiMonitor import PiMonitor
 
 # Set up logging
 logging.basicConfig(filename="log.log",
