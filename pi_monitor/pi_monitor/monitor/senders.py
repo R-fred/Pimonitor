@@ -17,7 +17,7 @@ class _ISender(metaclass=_ABCMeta):
 
     @staticmethod
     @_abstractmethod
-    def send(self):
+    def send(self, message: _Any):
         pass
 
 

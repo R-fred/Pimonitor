@@ -3,7 +3,7 @@ import datetime as _dt
 from typing import Dict as _Dict, List as _List, NamedTuple as _NamedTuple, Optional as _Optional, Any as _Any, Union as _Union
 
 import psutil as _ps
-from psutil import Process as _proc
+from psutil import Process as _proc, virtual_memory
 
 from ._monitorABC import IMonitor as _IMonitor
 from ._utils import _utc_timestamp, UpTimeData as _UpTimeData
@@ -57,7 +57,21 @@ class Uptime(_IMonitor):
         m, s = divmod(m*60, 1)
         s = round(s*60, 0)
 
-        return UpTimeData(days=uptime.days, hours=int(h), minutes=int(m), seconds=int(s))
+        return _UpTimeData(days=uptime.days, hours=int(h), minutes=int(m), seconds=int(s))
+
+
+    def __eq__(self, other):
+        # For this class, always expect False
+        if isinstance(other, Uptime):
+            id_check = self.id == other.id
+            boot_time_check = self.boot_time == other.boot_time
+            uptime_check = self.uptime == other.uptime
+
+            output = id_check and boot_time_check and uptime_check
+
+            return output
+        
+        return False
 
 
 @_dataclass
@@ -131,6 +145,20 @@ class CPU(_IMonitor):
             return output
 
 
+    def __eq__(self, other):
+        if isinstance(other, CPU):
+            id_check = self.id == other.id
+            average_load_check = self.average_load == other.average_load
+            cpu_percent_check = self.cpu_percent == other.cpu_percent 
+            per_cpu_check = self.per_cpu == other.per_cpu
+
+            output = id_check and average_load_check and cpu_percent_check and per_cpu_check
+
+            return output
+        
+        return False
+
+
 @_dataclass
 class Memory(_IMonitor):
     """[summary]
@@ -172,6 +200,19 @@ class Memory(_IMonitor):
             raise
         finally:
             return output
+
+
+    def __eq__(self, other):
+        if isinstance(other, Memory):
+            id_check = self.id == other.id
+            virtual_check = self.virtual == other.virtual
+            swap_check = self.swap == other.swap 
+
+            output = id_check and virtual_check and swap_check
+
+            return output
+        
+        return False
 
 
 @_dataclass
@@ -218,6 +259,22 @@ class Disk(_IMonitor):
             raise
         finally:
             return output
+
+
+    def __eq__(self, other):
+        if isinstance(other, Disk):
+            id_check = self.id == other.id
+            io_counters_check = self.io_counters == other.io_counters
+            n_partitions_check = self.n_partitions == other.n_partitions
+            partitions_check = self.partitions == other.partitions
+            usage_check = self.usage == other.usage
+
+            output = id_check and io_counters_check and n_partitions_check and partitions_check and usage_check
+
+            return output
+        
+        return False
+
     
 
 @_dataclass
@@ -304,6 +361,18 @@ class Process(_IMonitor):
             return output
 
 
+    def __eq__(self, other):
+        if isinstance(other, Process):
+            id_check = self.id == other.id
+            process_list_check = self.process_list == other.process_list
+            n_processes_check = self.n_processes == other.n_processes
+
+            output = id_check and process_list_check and n_processes_check
+            
+            return output
+        
+        return False
+
 _MONITORS = {"Uptime": Uptime, "CPU": CPU, "Memory": Memory, "Disk": Disk, "Process": Process}
 
 # ######### QUICK TESTS #########
@@ -320,7 +389,10 @@ _MONITORS = {"Uptime": Uptime, "CPU": CPU, "Memory": Memory, "Disk": Disk, "Proc
 # print(ut.uptime)
 
 # print("\n----- CPU Monitor ------")
-# cp = CPU()
+cp = CPU()
+cp2 = CPU()
+
+print(cp == cp2)
 # cp.run()
 # print(cp.average_load)
 # print(cp.cpu_percent)
