@@ -5,6 +5,7 @@
 
 from abc import ABCMeta as _ABCMeta, abstractmethod as _abstractmethod
 from collections import deque as _deque
+from time import sleep as _sleep
 from typing import Dict as _Dict, List as _List, Any as _Any, Optional as _Optional, Deque as _Deque
 
 from ._monitorABC import IMonitor as _IMonitor
@@ -25,25 +26,32 @@ class Agent():
 
         self._valuestore: _Deque = _deque(maxlen=300) # Store monitor values
         self._changed: bool = False
+        self._continue: bool = True
     
     def run(self, verbose: bool = False):
         output = None
         try:
-            self.monitors = [m() for m in self.monitors]
-            self._valuestore.append([m.run() for m in self.monitors])
+            while self._continue:
+                self.monitors = [m() for m in self.monitors]
+                self._valuestore.append([m.run() for m in self.monitors])
 
-            if self.on_change and len(self._valuestore) > 1:
-                if self._compare_monitoring_values():
+                if self.on_change: # and len(self._valuestore) > 1:
+                    if self._compare_monitoring_values():
+                        output = {"context_data": self.context_data.as_dict(),
+                                "monitoring_data": [m.as_dict() for m in self.monitors]}
+
+                        for s in self.senders:
+                            s.send(message=output)
+
+                    _sleep(self.interval)
+                        
+                else: # only there for demo purposes at the moment.
                     output = {"context_data": self.context_data.as_dict(),
-                            "monitoring_data": [m.as_dict() for m in self.monitors]}
-                    for s in self.senders:
-                        s.send(message=output)
-            else: # only there for demo purposes at the moment.
-                output = {"context_data": self.context_data.as_dict(),
-                          "monitoring_data": {m.mtype:m.as_dict() for m in self.monitors}
-                          }
+                            "monitoring_data": {m.mtype:m.as_dict() for m in self.monitors}
+                            }
 
         except:
+            self._continue = False
             raise
 
         finally:
