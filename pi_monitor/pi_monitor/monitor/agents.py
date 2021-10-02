@@ -49,6 +49,7 @@ class Agent():
         finally:
             self._discard_monitoring_data()
             if verbose:
+                print(f"{len(self._valuestore)} monitoring data points in memory.")
                 return output
     
     # EXPLAIN: Functions needed to manage the agent's "memory".
