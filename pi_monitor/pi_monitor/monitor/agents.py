@@ -40,11 +40,12 @@ class Agent():
                         s.send(message=output)
             else:
                 output = {"context_data": self.context_data.as_dict(),
-                          "monitoring_data": [m.as_dict() for m in self.monitors]}
+                          "monitoring_data": {m.mtype:m.as_dict() for m in self.monitors}
+                          }
 
         except:
             raise
-        
+
         finally:
             self._discard_monitoring_data()
             return output
