@@ -50,8 +50,7 @@ class Agent():
             self._discard_monitoring_data()
             if verbose:
                 print(f"{len(self._valuestore)} monitoring data points in memory.")
-                print(output)
-            # return output # not necessary since values are passed to the sender directly.
+                return output # not necessary since values are passed to the sender directly.
     
     # EXPLAIN: Functions needed to manage the agent's "memory".
     def _compare_monitoring_values(self) -> _Optional[bool]:
