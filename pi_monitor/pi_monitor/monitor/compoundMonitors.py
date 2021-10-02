@@ -1,19 +1,18 @@
-import asyncio
-import datetime as dt
-from typing import Optional, List, Union, Dict, Any
+import datetime as _dt
+from typing import Optional as _Optional, List as _List, Union as _Union, Dict as _Dict, Any as _Any
 
-from .monitorABC import IMonitor
-from .utils import _utc_timestamp, _uuid, get_monitor_name
+from ._monitorABC import IMonitor as _IMonitor
+from ._utils import _utc_timestamp
 
-class CompoundMonitor(IMonitor):
+class CompoundMonitor(_IMonitor):
     """Class to monitor several aspects of the computer
     """
-    def __init__(self, name: Optional[None] = None, monitors: Optional[List[IMonitor]] = None, was_run: bool = False) -> None:
+    def __init__(self, name: _Optional[str] = None, monitors: _Optional[_List[_IMonitor]] = None, was_run: bool = False) -> None:
         
         super().__init__()
         
         self.name = name
-        self.monitors: Dict[str, IMonitor] = {}
+        self.monitors: _Dict[str, _IMonitor] = {}
 
         if monitors != None:
             if type(monitors) != list:
@@ -23,7 +22,7 @@ class CompoundMonitor(IMonitor):
         
         self.n_monitors: int = len(self.monitors.keys())
     
-    def add_monitor(self, monitors: Union[IMonitor, List[IMonitor]]) -> None:
+    def add_monitor(self, monitors: _Union[_IMonitor, _List[_IMonitor]]) -> None:
         try:
             if type(monitors) != list:
                 monitors = [monitors]
@@ -33,19 +32,19 @@ class CompoundMonitor(IMonitor):
         except:
             raise
 
-    def as_dict(self) -> Dict[str, Any]:
+    def as_dict(self) -> _Dict[str, _Any]:
         output = {}
         try:
             output = {"id": self.id,
                     "name": self.name,
-                    "timestamp": str(dt.datetime.fromtimestamp(self.timestamp)),
+                    "timestamp": str(_dt.datetime.fromtimestamp(self.timestamp)),
                     "monitor_data": [self.get_monitor_data(name=k) for k in self.monitors.keys()]}
         except:
             raise
         finally:
             return output
     
-    def get_monitor_data(self, name: str) -> Dict[str, Any]:
+    def get_monitor_data(self, name: str) -> _Dict[str, _Any]:
         output = {}
         try:
             output[name] = self.monitors[name].as_dict()

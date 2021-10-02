@@ -1,31 +1,30 @@
-from dataclasses import field
-import datetime as dt
-import platform as pf
-import re
-import socket
-from typing import Optional, Dict, Any
-import uuid
+from dataclasses import field as _field
+import platform as _pf
+import re as _re
+import socket as _socket
+from typing import Optional as _Optional, Dict as _Dict, Any as _Any
+import uuid as _uuid
 
-import psutil as ps
-from pydantic.dataclasses import dataclass
+import psutil as _ps
+from pydantic.dataclasses import dataclass as _dataclass
 
-from .utils import _utc_timestamp
+from ._utils import _utc_timestamp
 
-@dataclass
+@_dataclass
 class ContextData:
     """Class representing a set of data providing context for the monitoring data.
 
     Returns:
         ContextData: [description]
     """
-    ip_address: Optional[str] = field(init=False)
-    mac_address: Optional[str] = field(init=False)
-    localhostname: Optional[str] = field(init=False, default_factory=pf.node)
-    timestamp: float = field(init=False, repr=True,
+    ip_address: _Optional[str] = None
+    mac_address: _Optional[str] = None
+    localhostname: _Optional[str] = _field(init=False, default_factory=_pf.node)
+    timestamp: float = _field(init=False, repr=True,
                             metadata={"unit": "s",
                             "description": "returned as seconds from 1970.01.01 00:00"})
   
-    boot_time: float = field(init=False, default_factory=ps.boot_time, repr=True,
+    boot_time: float = _field(init=False, default_factory=_ps.boot_time, repr=True,
                             metadata={"unit": "s",
                             "description": "returned as seconds from 1970.01.01 00:00"})
     
@@ -41,7 +40,7 @@ class ContextData:
         The IP address is associated to the primary network interface.
         """
         try:
-            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            s = _socket.socket(_socket.AF_INET, _socket.SOCK_DGRAM)
             s.connect(('10.10.10.10', 1))
             self.ip_address = s.getsockname()[0]
         
@@ -59,7 +58,7 @@ class ContextData:
         This is NOT the MAC address of the network adapter.
         """
         try:
-            self.mac_address = ':'.join(re.findall('..', '%012x' % uuid.getnode()))
+            self.mac_address = ':'.join(_re.findall('..', '%012x' % _uuid.getnode()))
         except:
             self.mac_address = None
         return None
@@ -67,7 +66,7 @@ class ContextData:
 
     def _get_network_addresses(self) -> None:
         try:
-            input = {k: v for k, v in ps.net_if_addrs().items() for x in v if x.family == 2 and x.address != "127.0.0.1"}
+            input = {k: v for k, v in _ps.net_if_addrs().items() for x in v if x.family == 2 and x.address != "127.0.0.1"}
             input = {k: [x for x in v if x.family in (2,18)] for k,v in input.items()}
             input = [(k, x.family, x.address) for k, v in input.items() for x in v]
  
@@ -82,7 +81,7 @@ class ContextData:
             return None
 
 
-    def as_dict(self) -> Dict[str, Any]:
+    def as_dict(self) -> _Dict[str, _Any]:
         self_dict = self.__dict__
         del self_dict["__initialised__"]
         return self_dict
