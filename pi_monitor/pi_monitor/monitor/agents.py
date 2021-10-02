@@ -26,7 +26,7 @@ class Agent():
         self._valuestore: _Deque = _deque(maxlen=300) # Store monitor values
         self._changed: bool = False
     
-    def run(self):
+    def run(self, verbose: bool = False):
         output = None
         try:
             self.monitors = [m() for m in self.monitors]
@@ -48,7 +48,8 @@ class Agent():
 
         finally:
             self._discard_monitoring_data()
-            return output
+            if verbose:
+                return output
     
     # EXPLAIN: Functions needed to manage the agent's "memory".
     def _compare_monitoring_values(self) -> _Optional[bool]:
