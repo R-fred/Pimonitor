@@ -389,10 +389,10 @@ _MONITORS = {"Uptime": Uptime, "CPU": CPU, "Memory": Memory, "Disk": Disk, "Proc
 # print(ut.uptime)
 
 # print("\n----- CPU Monitor ------")
-cp = CPU()
-cp2 = CPU()
+# cp = CPU()
+# cp2 = CPU()
 
-print(cp == cp2)
+# print(cp == cp2)
 # cp.run()
 # print(cp.average_load)
 # print(cp.cpu_percent)
