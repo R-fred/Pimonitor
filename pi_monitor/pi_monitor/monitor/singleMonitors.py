@@ -37,12 +37,18 @@ class Uptime(_IMonitor):
             return self
 
 
-    def as_dict(self) -> _Optional[_Dict[str, _Any]]:
+    def as_dict(self, timestamp_as_string: bool = True) -> _Optional[_Dict[str, _Any]]:
         output = None
+        ts = self.timestamp
+        bt = self.boot_time
         try:
+            if timestamp_as_string:
+                ts = str(_dt.datetime.fromtimestamp(ts))
+                bt = str(_dt.datetime.fromtimestamp(bt))
+
             output = {"id": self.id,
-                      "timestamp": str(_dt.datetime.fromtimestamp(self.timestamp,tz=_dt.timezone.utc)),
-                      "boot_time": str(_dt.datetime.fromtimestamp(self.boot_time)),
+                      "timestamp": ts,
+                      "boot_time": bt,
                       "uptime": self.uptime._asdict()}
         except:
             raise
@@ -105,11 +111,15 @@ class CPU(_IMonitor):
             return self
 
   
-    def as_dict(self):
+    def as_dict(self, timestamp_as_string: bool = True):
         output = None
+        ts = self.timestamp
         try:
+            if timestamp_as_string:
+                ts = str(_dt.datetime.fromtimestamp(ts))
+            
             output = {"id": self.id,
-                    "timestamp": self.timestamp,
+                    "timestamp": ts,
                     "cpu_percent": {"per_cpu": self.per_cpu, "cpu_percent": self.cpu_percent},
                     "average_load": self.average_load
                     }
@@ -188,11 +198,16 @@ class Memory(_IMonitor):
             return self
 
 
-    def as_dict(self) -> _Optional[_Dict[str, _Any]]:
+    def as_dict(self, timestamp_as_string: bool = True) -> _Optional[_Dict[str, _Any]]:
         output = None
+        ts = self.timestamp
+
         try:
+            if timestamp_as_string:
+                ts = str(_dt.datetime.fromtimestamp(ts))
+
             output = {"id": self.id,
-                    "timestamp": self.timestamp,
+                    "timestamp": ts,
                     "virtual_memory": self.virtual._asdict(),
                     "swap": self.swap._asdict()
                     }
@@ -245,11 +260,16 @@ class Disk(_IMonitor):
             return self
 
 
-    def as_dict(self) -> _Optional[_Dict[str, _Any]]:
+    def as_dict(self, timestamp_as_string: bool = True) -> _Optional[_Dict[str, _Any]]:
         output = None
+        ts = self.timestamp
+
         try:
+            if timestamp_as_string:
+                ts = str(_dt.datetime.fromtimestamp(ts))
+
             output = {"id": self.id,
-                    "timestamp": self.timestamp,
+                    "timestamp": ts,
                     "io_counters": self.io_counters._asdict(),
                     "n_partitions": self.n_partitions,
                     "partitions": [p._asdict() for p in self.partitions],
@@ -303,11 +323,16 @@ class Process(_IMonitor):
             return self
 
 
-    def as_dict(self) -> _Optional[_Dict[str, _Any]]:
+    def as_dict(self, timestamp_as_string: bool = True) -> _Optional[_Dict[str, _Any]]:
         output = None
+        ts = self.timestamp
+
         try:
+            if timestamp_as_string:
+                ts = str(_dt.datetime.fromtimestamp(ts))
+
             output = {"id": self.id,
-                    "timestamp": self.timestamp,
+                    "timestamp": ts,
                     "process_list": self.process_list,
                     "n_processes": self.n_processes
                     }

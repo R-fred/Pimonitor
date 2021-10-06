@@ -1,6 +1,6 @@
 # Pi monitor
 Pi monitor provides a high level API to monitor various aspects of your Raspberry pi hardware.
-It abstarcts calls to the platform, socket and psutil packages and tries to groups them in logical monitor units:
+It abstracts calls to the platform, socket and psutil packages and tries to groups them in logical monitor units:
 
 - CPU
 - Memory
@@ -10,6 +10,10 @@ It abstarcts calls to the platform, socket and psutil packages and tries to grou
 - Network (coming soon)
 
 All monitors can be run using one unique method ```Monitor.run()``` with *Monitor* being one of the above (see examples below).
+
+Pi monitor also implements Agents to allow you to run one or more monitors at given intervals. Agents also contain the necessary logic to send messages to your desired monitoring channel.
+
+Finally, Pi Monitor provides a CLI interface to monitor your Raspberry pi.
 
 
 Pi monitor is hosted at:
@@ -29,7 +33,7 @@ It comes (will come :-)) with several options to send your monitoring data to a 
 
 ### Getting data about your Raspberry pi
 Getting context data about your raspberry pi is useful, especially in industrial scenarii where your devices might be located anywhere around the globe.
-Getting this data at every run is computationally expensive. Pi Monitor defines the *ContextData* class for that.
+Getting this data every time you run a monitor is computationally expensive. Pi Monitor defines the *ContextData* class for that.
 This way, the never changing data about your Raspberry pi is collected only once at the beginning of the monitoring process.
 
 ```
@@ -38,6 +42,12 @@ from pi_monitor.contextdata import ContextData
 context = ContextData()
 
 print(context.as_dict())
+
+> {'ip_address': 'the current IP address of your Raspi',
+> 'mac_address': 'here your Raspi mac address in hexadecimal format',
+> 'localhostname': 'Raspberry1003',
+> 'timestamp': 1633550807.495248,
+> 'boot_time': 1633178880.0}
 
 ```
 
@@ -99,7 +109,7 @@ while True:
 
 ### Monitoring agents
 ```
-
+Pi monitor 
 
 
 ```
