@@ -3,7 +3,7 @@ from rich.progress import track
 from time import sleep
 import time
 
-from monitor.singleMonitors import CPU, Memory, Process, Uptime, Disk
+from pi_monitor.monitor.singleMonitors import CPU, Memory, Process, Uptime, Disk
 
 console = Console()
 

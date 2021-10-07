@@ -30,6 +30,12 @@ class ContextData:
     
     def __post_init__(self) -> None:
         self._get_network_addresses()
+
+        if self.ip_address == None:
+            self._get_ip_address()
+        if self.mac_address == None:
+            self._get_uuid_mac_address()
+
         self.timestamp = _utc_timestamp()
         return None
 
