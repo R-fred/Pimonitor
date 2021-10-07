@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='pi_monitor',
-      version='0.13',
+      version='0.13.1',
       description='A package to monitor your raspberry pi and more!',
       url='',
       author='Frederick Chesneau',
