@@ -89,5 +89,5 @@ class ContextData:
 
     def as_dict(self) -> _Dict[str, _Any]:
         self_dict = self.__dict__
-        del self_dict["__initialised__"]
+        del self_dict["__initialized__"]
         return self_dict

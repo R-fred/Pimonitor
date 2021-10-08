@@ -33,7 +33,13 @@ class Agent():
         output = None
         try:
             while self._continue:
-                initial = [m() for m in self.monitors if m.was_run == False]
+                initial = []
+                for m in self.monitors:
+                    if m.was_run == False:
+                        print(f"initiating: {m.mtype}")
+                        initial.append(m())
+
+                # initial = [m() for m in self.monitors if m.was_run == False]
                 if len(initial) > 0:
                     self.monitors = initial
                 
@@ -44,28 +50,32 @@ class Agent():
                         output = {"context_data": self.context_data.as_dict(),
                                 "monitoring_data": [m.as_dict() for m in self.monitors]}
 
-                        for s in self.senders:
-                            s.send(message=output)
-
-                    _sleep(self.interval)
-                    print(f"length of self._valuestore:{len(self._valuestore)}") # sending goes here. 
-                    print(f"length of output dictionary:{len(output)}")
-
-                    self._discard_monitoring_data() # clean up queue.
 
                 else: # only there for demo purposes at the moment.
                     output = {"context_data": self.context_data.as_dict(),
                             "monitoring_data": {m.mtype:m.as_dict() for m in self.monitors}
                             }
+                
+                print(output)
+                
+                for s in self.senders:
+                    s.send(message=output)
+                
+                _sleep(self.interval)
+                print(f"length of self._valuestore:{len(self._valuestore)}") # sending goes here. 
+                # print(f"length of output dictionary:{len(output)}")
 
         except:
             self._continue = False
+            print("Error")
             raise
 
         finally:
             if verbose:
                 print(f"{len(self._valuestore)} monitoring data points in memory.")
-                return output # not necessary since values are passed to the sender directly.
+                print(self._continue)
+            self._continue = True
+            return output # not necessary since values are passed to the sender directly.
     
     # EXPLAIN: Functions needed to manage the agent's "memory".
     def _compare_monitoring_values(self) -> _Optional[bool]:
@@ -87,10 +97,6 @@ class Agent():
         finally:
             return output
 
-    def _discard_monitoring_data(self) -> None:
-        # if the length of self._valuestore reaches its maximum value, discard all values except last entry.
-        if len(self._valuestore) == self._valuestore.maxlen:
-            self._valuestore = _deque(self._valuestore.pop(), maxlen=self.queue_length)
 
     def list_parts(self) -> _Dict[str, _List[_Any]]:
         return {"monitors": self.monitors, "senders": self.senders}
@@ -154,3 +160,15 @@ class AgentBuilder(_IAgentBuilder):
 #         self._builder.build_monitor()
 
 #         return self._builder.build()
+
+# from pi_monitor.monitor.singleMonitors import CPU, Uptime, Memory, Disk, Process
+
+# ag_builder = AgentBuilder()
+# ag_builder.add_monitor(Uptime)
+# ag_builder.add_monitor(CPU)
+# ag_builder.add_monitor(Memory)
+# ag_builder.add_monitor(Disk)
+# ag_builder.add_monitor(Process)
+# agent = ag_builder.build()
+
+# agent.run()
