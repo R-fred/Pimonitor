@@ -33,33 +33,27 @@ class Agent():
         output = None
         try:
             while self._continue:
-                initial = []
-                for m in self.monitors:
-                    if m.was_run == False:
-                        print(f"initiating: {m.mtype}")
-                        initial.append(m())
-
-                # initial = [m() for m in self.monitors if m.was_run == False]
+                initial = [m() for m in self.monitors if m.was_run == False]
                 if len(initial) > 0:
                     self.monitors = initial
                 
                 self._valuestore.append([m.run() for m in self.monitors])
 
                 if self.on_change and len(self._valuestore) > 1:
-                    if self._compare_monitoring_values():
+                    if self._compare_monitoring_values() == False:
                         output = {"context_data": self.context_data.as_dict(),
                                 "monitoring_data": [m.as_dict() for m in self.monitors]}
 
 
                 else: # only there for demo purposes at the moment.
-                    output = {"context_data": self.context_data.as_dict(),
+                    output = {"context_data": self.context_data.as_dict(), # self.context_data.as_dict()
                             "monitoring_data": {m.mtype:m.as_dict() for m in self.monitors}
                             }
                 
                 print(output)
-                
-                for s in self.senders:
-                    s.send(message=output)
+                if len(self.senders) > 0:
+                    for s in self.senders:
+                        s.send(message=output)
                 
                 _sleep(self.interval)
                 print(f"length of self._valuestore:{len(self._valuestore)}") # sending goes here. 
@@ -78,9 +72,9 @@ class Agent():
             return output # not necessary since values are passed to the sender directly.
     
     # EXPLAIN: Functions needed to manage the agent's "memory".
-    def _compare_monitoring_values(self) -> _Optional[bool]:
+    def _compare_monitoring_values(self) -> bool:
         # compare hashes? would need to create a custon hash function for each dataclass.
-        output = None
+        output = False
         try:
             if len(self._valuestore) > 1:
                 current_item: int = len(self._valuestore)

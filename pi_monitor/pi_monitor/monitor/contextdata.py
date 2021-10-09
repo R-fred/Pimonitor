@@ -1,14 +1,15 @@
 from dataclasses import field as _field
+import datetime as _dt
 import platform as _pf
 import re as _re
 import socket as _socket
 from typing import Optional as _Optional, Dict as _Dict, Any as _Any
-import uuid as _uuid
+# import uuid as _uuid
 
 import psutil as _ps
 from pydantic.dataclasses import dataclass as _dataclass
 
-from ._utils import _utc_timestamp
+from ._utils import _utc_timestamp, _uuid
 
 @_dataclass
 class ContextData:
@@ -17,9 +18,10 @@ class ContextData:
     Returns:
         ContextData: [description]
     """
+    id: str = _field(init=False, default_factory=_uuid)
     ip_address: _Optional[str] = None
     mac_address: _Optional[str] = None
-    localhostname: _Optional[str] = _field(init=False, default_factory=_pf.node)
+    localhost_name: _Optional[str] = _field(init=False, default_factory=_pf.node)
     timestamp: float = _field(init=False, repr=True,
                             metadata={"unit": "s",
                             "description": "returned as seconds from 1970.01.01 00:00"})
@@ -87,7 +89,24 @@ class ContextData:
             return None
 
 
-    def as_dict(self) -> _Dict[str, _Any]:
-        self_dict = self.__dict__
-        del self_dict["__initialized__"]
-        return self_dict
+    def as_dict(self, timestamp_as_string: bool = True) -> _Dict[str, _Any]: # TODO: review
+        output = None
+        ts = self.timestamp
+        bs = self.boot_time
+
+        try:
+            if timestamp_as_string:
+                ts = str(_dt.datetime.fromtimestamp(ts))
+                bs = str(_dt.datetime.fromtimestamp(bs))
+
+            output = {"id": self.id,
+                    "timestamp": ts,
+                    "ip_address": self.ip_address,
+                    "mac_address": self.mac_address,
+                    "localhost_name": self.localhost_name,
+                    "boot_time": bs
+                    }
+        except:
+            raise
+        finally:
+            return output
