@@ -37,7 +37,7 @@ class Agent():
             while self._continue:
                 if self._contextdata_reload != None:
                     if _dt.datetime.now().timestamp() >= (self.context_data.timestamp + self._contextdata_reload):
-                        print("---> reloaded context data <----")
+                        # print("---> reloaded context data <----")
                         self.context_data = _ContextData()
                 initial = [m() for m in self.monitors if m.was_run == False]
                 if len(initial) > 0:
