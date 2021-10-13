@@ -16,17 +16,3 @@ class MonitorFactory:
             raise
         finally:
             return monitor
-
-
-
-##### QUICK TESTS #####
-
-# a = MonitorFactory.create_monitor("Uptime")
-# print(a.mtype)
-# a.run()
-# print(a.uptime)
-
-# a = MonitorFactory.create_monitor("CPU")
-# print(a.mtype)
-# a.run()
-# print(a.average_load)

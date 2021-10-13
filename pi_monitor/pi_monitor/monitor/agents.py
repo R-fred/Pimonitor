@@ -5,6 +5,7 @@
 
 from abc import ABCMeta as _ABCMeta, abstractmethod as _abstractmethod
 from collections import deque as _deque
+import datetime as _dt
 from time import sleep as _sleep
 from typing import Dict as _Dict, List as _List, Any as _Any, Optional as _Optional, Deque as _Deque, Union as _Union
 
@@ -15,7 +16,7 @@ from .contextdata import ContextData as _ContextData
 
 class Agent():
 
-    def __init__(self, on_change: bool = True, interval: _Optional[_Union[int, float]] = 5, queue_length: int = 15) -> None:
+    def __init__(self, on_change: bool = True, interval: _Optional[_Union[int, float]] = 5, queue_length: int = 15, contextdata_reload_every: _Optional[float] = None) -> None:
         self.context_data: _ContextData = _ContextData()
 
         self.monitors: _List[_IMonitor] = []
@@ -28,11 +29,16 @@ class Agent():
         self._valuestore: _Deque = _deque(maxlen=self.queue_length) # Store monitor values
         self._changed: bool = False
         self._continue: bool = True
+        self.contextdata_reload =  contextdata_reload_every
     
     def run(self, verbose: bool = False):
         output = None
         try:
             while self._continue:
+                if self._contextdata_reload != None:
+                    if _dt.datetime.now().timestamp() >= (self.context_data.timestamp + self._contextdata_reload):
+                        print("---> reloaded context data <----")
+                        self.context_data = _ContextData()
                 initial = [m() for m in self.monitors if m.was_run == False]
                 if len(initial) > 0:
                     self.monitors = initial
