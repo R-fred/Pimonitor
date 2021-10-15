@@ -16,7 +16,7 @@ from .contextdata import ContextData as _ContextData
 
 class Agent():
 
-    def __init__(self, on_change: bool = True, interval: _Optional[_Union[int, float]] = 5, queue_length: int = 15, contextdata_reload_every: _Optional[float] = None) -> None:
+    def __init__(self, on_change: bool = True, interval: _Optional[_Union[int, float]] = 5, queue_length: int = 15) -> None:
         self.context_data: _ContextData = _ContextData()
 
         self.monitors: _List[_IMonitor] = []
@@ -29,13 +29,13 @@ class Agent():
         self._valuestore: _Deque = _deque(maxlen=self.queue_length) # Store monitor values
         self._changed: bool = False
         self._continue: bool = True
-        self.contextdata_reload =  contextdata_reload_every
     
-    def run(self, verbose: bool = False):
+    def run(self, verbose: bool = False, reload_every: _Optional[float] = None):
+        _reload_every = reload_every
         output = None
         try:
             while self._continue:
-                if self._contextdata_reload != None:
+                if _reload_every != None:
                     if _dt.datetime.now().timestamp() >= (self.context_data.timestamp + self._contextdata_reload):
                         # print("---> reloaded context data <----")
                         self.context_data = _ContextData()
@@ -162,6 +162,7 @@ class AgentBuilder(_IAgentBuilder):
 #         return self._builder.build()
 
 # from pi_monitor.monitor.singleMonitors import CPU, Uptime, Memory, Disk, Process
+
 
 # ag_builder = AgentBuilder()
 # ag_builder.add_monitor(Uptime)

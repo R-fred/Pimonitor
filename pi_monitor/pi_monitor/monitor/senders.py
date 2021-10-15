@@ -41,18 +41,20 @@ class PubSubSender(_ISender):
 
 class FileSender(_ISender):
     
-    def __init__(self):
+    def __init__(self, filepath: str, append: bool = True):
         super().__init__()
+        self.file_path = filepath
+        self.append = append
 
-    def send(self, filepath: str, message: _Any, append: bool = True):
+    def send(self, message: _Any):
         try:
-            fmode = "a"
-            if append != True:
-                ...
+            fmode = "w"
+            if self.append:
+                fmode = "a"
 
-            msg = f"Message sent to {filepath}. Message: {message}. Date and time: {str(_dt.datetime.now())}"
+            msg = f"\n> {str(_dt.datetime.now())}: {message}."
 
-            with open(file = filepath, mode = fmode) as f:
+            with open(file = self.file_path, mode = fmode, newline="\n", encoding="utf-8") as f:
                 f.write(msg)
         except:
             raise
@@ -83,11 +85,10 @@ _SENDERTYPES: _List[_Any] = [k.lower() for k, v in _SENDERS.items()]
 class SenderFactory:
     
     @staticmethod
-    def build(sender_type: str = "File") -> _Optional[_ISender]:
-        output = None
+    def build(sender_type: str, **kwargs) -> _Optional[_ISender]:
         try:
             if sender_type.lower() in _SENDERTYPES:
-                output = _SENDERS[sender_type.lower()]()
+                output = _SENDERS[sender_type.lower()](**kwargs)
         except:
             raise
         finally:

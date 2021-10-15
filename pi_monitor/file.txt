@@ -1,0 +1,4 @@
+Message sent to ./file.txt. Message: message. Date and time: 2021-10-15 19:07:36.394362
+> 2021-10-15 19:10:26.867001: message.> 2021-10-15 19:11:54.598421: Sender is working. Awesome!.
+> 2021-10-15 19:15:18.286565: Sender is working. Awesome!.
+> 2021-10-15 19:16:34.560410: Sender is working. Awesome!.
