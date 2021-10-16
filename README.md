@@ -109,7 +109,25 @@ while True:
 
 ### Monitoring agents
 ```
-Pi monitor 
+from pi_monitor.monitor.agents import AgentBuilder
+from pi_monitor.monitor.senders import SenderFactory
+from pi_monitor.monitor.singleMonitors import CPU, Uptime, Process, Memory, Disk
 
+ag_builder = AgentBuilder()
+sender_builder = SenderFactory()
+
+sqlite_sender = sender_builder.build(sender_type="sqlite", database_name="./db.sqlite")
+file_sender = sender_builder.build(sender_type="file", filepath="./file.txt")
+
+ag_builder.add_monitor(CPU)
+ag_builder.add_monitor(Uptime)
+ag_builder.add_monitor(Memory)
+
+ag_builder.add_sender(sqlite_sender)
+ag_builder.add_sender(file_sender)
+
+agent = ag_builder.build()
+
+agent.run()
 
 ```
