@@ -3,6 +3,9 @@ import datetime as _dt
 import time as _time
 from typing import Dict as _Dict, List as _List, Any as _Any, Optional as _Optional
 from io import BytesIO as _BytesIO
+import json as _json
+import re as _re
+import sqlite3 as _sqlite3
 from uuid import uuid4 as _uuid4
 
 from fastapi import FastAPI as _FastAPI
@@ -64,14 +67,51 @@ class FileSender(_ISender):
 
 class SQLiteSender(_ISender):
 
-    def __init__(self):
+    def __init__(self, database_name: str, table_name: _Optional[str] = None):
         super().__init__()
+        self.database_name = database_name
+        self.table_name = table_name
     
-    def send(self, database_name: str, message: str):
-        return f"Message sent to {database_name}. Message: {message}. Date and time: {str(_dt.datetime.now())}"
+    def send(self, message: str):
+        """[summary]
+
+        Args:
+            message (str): [description]
+            database_name (str): [description]
+            table_name (_Optional[str], optional): [description]. Defaults to None.
+
+        Returns:
+            [type]: [description]
+        """
+
+        try:
+            msg = _json.loads(message)
+            data = msg["monitoring_data"]
+            ctxt = msg["context_data"]
+            if self.table_name == None:
+                self.table_name = ctxt['localhost_name']
+                self.table_name = self.table_name.replace("-", "_")
+                self.table_name = self.table_name.replace(".", "_")
+
+            db_table = f"CREATE TABLE IF NOT EXISTS {self.table_name} (timestamp TEXT, context JSON, monitors TEXT, data json)"
+
+            conn = _sqlite3.connect(database=self.database_name)
+            c = conn.cursor()
+            
+            c.execute(db_table) # create table if it does not exist
+            
+            stmt = f"INSERT INTO {self.table_name} VALUES ('{str(_dt.datetime.now())}', '{_json.dumps(ctxt)}', '{'; '.join(data.keys())}', '{_json.dumps(data)}')"
+            c.execute(stmt)
+            conn.commit()
+            conn.close()
+
+        except:
+            print("----> Error in SQLiteSender <----")
+            print(stmt)
+            raise
 
 
-class StdoutSender(_ISender):
+class ConsoleSender(_ISender):
 
     def __init__(self):
         super().__init__()
@@ -79,7 +119,7 @@ class StdoutSender(_ISender):
     def send(self, message: str = f"Message sent to stdout. Message: 'This is a message'. Date and time: {str(_dt.datetime.now())}") -> None:
         print(message)
 
-_SENDERS:  _Dict[str, _Any]= {"rest": RESTSender, "pubsub": PubSubSender, "stdout": StdoutSender, "file": FileSender, "sqlite": SQLiteSender}
+_SENDERS:  _Dict[str, _Any]= {"rest": RESTSender, "pubsub": PubSubSender, "console": ConsoleSender, "file": FileSender, "sqlite": SQLiteSender}
 _SENDERTYPES: _List[_Any] = [k.lower() for k, v in _SENDERS.items()]
 
 class SenderFactory:
