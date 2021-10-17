@@ -115,7 +115,12 @@ Monitoring agents combine the monitors (e.g. CPU, Memory) and senders.
 Monitoring agents can contain as many monitors and senders as necessary.
 For instance, in the example below, we create and run an agent with 3 monitors and 2 senders.
 
+Agents are subclasses of *threading.Thread* and can be stopped gracefully using the *Agent.event* attribute (see below.).
+Each agent runs in its own thread.
+
 ```python
+from time import sleep
+
 from pi_monitor.monitor.agents import AgentBuilder
 from pi_monitor.monitor.senders import SenderFactory
 from pi_monitor.monitor.singleMonitors import CPU, Uptime, Process, Memory, Disk
@@ -135,7 +140,13 @@ ag_builder.add_sender(file_sender)
 
 agent = ag_builder.build()
 
-agent.run()
+agent.start()
+sleep(10) # do things
+agent.event.set() # stop monitor execution.
+
+# alternatively stop agent like this:
+agent.stop_agent()
+
 
 ```
 

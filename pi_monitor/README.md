@@ -144,6 +144,9 @@ agent.start()
 sleep(10) # do things
 agent.event.set() # stop monitor execution.
 
+# alternatively stop agent like this:
+agent.stop_agent()
+
 
 ```
 
