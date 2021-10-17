@@ -7,7 +7,7 @@ from abc import ABCMeta as _ABCMeta, abstractmethod as _abstractmethod
 from collections import deque as _deque
 import datetime as _dt
 import json as _json
-from threading import Thread as _Thread
+from threading import Thread as _Thread, Event as _Event
 from time import sleep as _sleep
 from typing import Dict as _Dict, List as _List, Any as _Any, Optional as _Optional, Deque as _Deque, Union as _Union
 
@@ -20,17 +20,16 @@ from .contextdata import ContextData as _ContextData
 
 class Agent(_Thread):
 
-    def __init__(self, interval: _Optional[_Union[int, float]] = 5, queue_length: int = 15) -> None:
-        """[summary]
+    def __init__(self, interval: _Optional[_Union[int, float]] = 5, queue_length: int = 15, reload_context_every: _Optional[float] = None) -> None:
 
-        Args:
-            interval (_Optional[_Union[int, float]], optional): [description]. Defaults to 5.
-            queue_length (int, optional): [description]. Defaults to 15.
-        """
         # Removed on_change functionality:
         # on init: on_change: bool = True,
         # attributes: self.on_change = on_change, self._changed: bool = False
+
+        super().__init__()
+
         self.context_data: _ContextData = _ContextData()
+        self.reload_context_every = reload_context_every
 
         self.monitors: _List[_IMonitor] = []
         self.senders: _List[_ISender] = []
@@ -39,30 +38,19 @@ class Agent(_Thread):
         self.queue_length = queue_length
 
         self._valuestore: _Deque = _deque(maxlen=self.queue_length) # Store monitor values - was originally added to support on_change functionality.
-        self._continue: bool = True
+        self.event: _Event = _Event()
     
-    def run(self, verbose: bool = False, reload_every: _Optional[float] = None):
-        """[summary]
-
-        Args:
-            verbose (bool, optional): [description]. Defaults to False.
-            reload_every (_Optional[float], optional): [description]. Defaults to None.
-
-        Returns:
-            [type]: [description]
-        """
-        _reload_every = reload_every
+    def run(self):
         output = None
 
         console = _Console()
 
         try:
-            while self._continue:
-                if _reload_every != None:
+            while not self.event.is_set():
+                if self.reload_context_every != None:
                     if _dt.datetime.now().timestamp() >= (self.context_data.timestamp + self._contextdata_reload):
-                        if verbose:
-                            console.print("---> reloading context data <----", style="green")
                         self.context_data = _ContextData()
+                
                 initial = [m() for m in self.monitors if m.was_run == False]
                 if len(initial) > 0:
                     self.monitors = initial
@@ -78,27 +66,24 @@ class Agent(_Thread):
                 if len(self.senders) > 0:
                     for s in self.senders:
                         s.send(message=output)
-                        if verbose:
-                            console.print("----> Sent message to destination <----", style="green")
                 
                 _sleep(self.interval)
 
         except KeyboardInterrupt:
-            self._continue = False
-            console.print("\n> Execution stopped by user\n", style="red")
-            raise           
+            if not self.event.is_set():
+                self.event.set()
+            console.print("\n> Execution stopped by user\n", style="red")       
 
         except:
-            self._continue = False
-            print("\nError\n")
-            raise
+            if not self.event.is_set():
+                self.event.set()
+            console.print("\nError\n")
 
         finally:
-            if verbose:
-                print(f"{len(self._valuestore)} monitoring data points in memory.")
-                print(self._continue)
-            self._continue = True
-            return output # not necessary since values are passed to the sender directly.
+            if not self.event.is_set():
+                self.event.set()
+                self.join(timeout=5)
+            return None
     
     # EXPLAIN: Functions needed to manage the agent's "memory".
     # def _compare_monitoring_values(self) -> bool:
