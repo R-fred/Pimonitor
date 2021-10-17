@@ -23,7 +23,7 @@ Package is hosted here:
 [https://test.pypi.org/search/?q=pi-monitor](https://test.pypi.org/search/?q=pi-monitor).
 
 To install:
-```
+```python
 pip install -i https://test.pypi.org/simple/ pi-monitor
 ```
 
@@ -36,7 +36,7 @@ Getting context data about your raspberry pi is useful, especially in industrial
 Getting this data every time you run a monitor is computationally expensive. Pi Monitor defines the *ContextData* class for that.
 This way, the never changing data about your Raspberry pi is collected only once at the beginning of the monitoring process.
 
-```
+```python
 from pi_monitor.contextdata import ContextData
 
 context = ContextData()
@@ -52,7 +52,7 @@ print(context.as_dict())
 ```
 
 ### Single monitors
-```
+```python
 from time import sleep
 
 from pi_monitor.monitor.singleMonitors import CPU
@@ -66,7 +66,7 @@ while True:
     sleep(1)
 ```
 
-```
+```python
 from pi_monitor.monitor.singleMonitors import Process
 process_monitor = Process()
 process_monitor.run()
@@ -77,7 +77,7 @@ process_monitor.process_info(r_processes[2])
 ### Compound monitors
 You can create your own custom monitor using compound monitors. These can be run using the same .run() method as regular monitors.
 
-```
+```python
 from time import sleep
 from pi_monitor.compoundMonitors import CoumpoundMonitor as CM
 from pi_monitor.monitor.singleMonitors import CPU, Uptime, Process, Memory, Disk
@@ -89,7 +89,8 @@ while True:
     sleep(1)
 ```
 Alternatively:
-```
+
+```python
 from time import sleep
 from pi_monitor.compoundMonitors import CoumpoundMonitor as CM
 from pi_monitor.monitor.singleMonitors import CPU, Uptime, Process, Memory, Disk
@@ -112,7 +113,7 @@ Monitoring agents combine the monitors (e.g. CPU, Memory) and senders.
 Monitoring agents can contain as many monitors and senders as necessary.
 For instance, in the example below, we create and run an agent with 3 monitors and 2 senders.
 
-```
+```python
 from pi_monitor.monitor.agents import AgentBuilder
 from pi_monitor.monitor.senders import SenderFactory
 from pi_monitor.monitor.singleMonitors import CPU, Uptime, Process, Memory, Disk
@@ -143,7 +144,7 @@ The data is stored in the database in json format according to the following sch
 
 We can now retrieve the data from the database easily.
 
-```
+```python
 import sqlite3
 
 conn = sqlite3.connect('./db.sqlite')
