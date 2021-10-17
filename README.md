@@ -27,7 +27,9 @@ To install:
 pip install -i https://test.pypi.org/simple/ pi-monitor
 ```
 
-It comes (will come :-)) with several options to send your monitoring data to a central server for storage and processing.
+It comes with several options to send your monitoring data to a central server for storage and processing.
+
+Currently, you can send your monitoring data to a file or an sqlite database (see examples below).
 
 ## Usage examples
 
