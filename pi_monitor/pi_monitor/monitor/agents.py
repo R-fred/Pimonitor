@@ -40,7 +40,7 @@ class Agent(_Thread):
         self._valuestore: _Deque = _deque(maxlen=self.queue_length) # Store monitor values - was originally added to support on_change functionality.
         self.event: _Event = _Event()
     
-    def run(self):
+    def run(self) -> None:
         output = None
 
         console = _Console()
@@ -84,7 +84,11 @@ class Agent(_Thread):
                 self.event.set()
                 self.join(timeout=5)
             return None
-    
+
+    def stop_agent(self) -> None:
+        self.event.set()
+        return None
+
     # EXPLAIN: Functions needed to manage the agent's "memory".
     # def _compare_monitoring_values(self) -> bool:
     #     # compare hashes? would need to create a custon hash function for each dataclass.
