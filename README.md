@@ -108,6 +108,10 @@ while True:
 ```
 
 ### Monitoring agents
+Monitoring agents combine the monitors (e.g. CPU, Memory) and senders.
+Monitoring agents can contain as many monitors and senders as necessary.
+For instance, in the example below, we create and run an agent with 3 monitors and 2 senders.
+
 ```
 from pi_monitor.monitor.agents import AgentBuilder
 from pi_monitor.monitor.senders import SenderFactory
@@ -131,3 +135,28 @@ agent = ag_builder.build()
 agent.run()
 
 ```
+
+The data is stored in the database in json format according to the following schema:
+```CREATE TABLE IF NOT EXISTS My_Raspberry_Pi_hostname (timestamp TEXT, context JSON, monitors TEXT, data json)```
+
+**TODO**: database table could be simplified by keeping data together in one single *JSON* column in the database (see [here](https://stackoverflow.com/questions/58519714/how-to-extract-properly-when-sqlite-json-has-value-as-an-array))
+
+We can now retrieve the data from the database easily.
+
+```
+import sqlite3
+
+conn = sqlite3.connect('./db.sqlite')
+c = conn.cursor("SELECT json_extract(context, '$.ip_address', '$.mac_address') from My_Raspberry_Pi LIMIT 1")
+c.fetchall()
+
+c.execute("SELECT json_extract(context, '$.CPU.cpu_percent.cpu_percent') FROM My_Raspberry_Pi WHERE monitors LIKE '%CPU%'")
+c.fetchall()
+
+c.execute("SELECT json_extract(data, '$.CPU.timestamp') AS Timestamp, json_extract(data, '$.CPU.cpu_percent.cpu_percent') AS CPU_percent FROM My_Raspberry_Pi WHERE monitors LIKE '%CPU%'")
+c.fetchall()
+
+conn.close()
+```
+
+For more details on how to retrieve data from json data structures in sqlite read [here](https://stackoverflow.com/questions/58519714/how-to-extract-properly-when-sqlite-json-has-value-as-an-array)
