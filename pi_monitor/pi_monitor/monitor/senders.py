@@ -8,9 +8,9 @@ import re as _re
 import sqlite3 as _sqlite3
 from uuid import uuid4 as _uuid4
 
-from fastapi import FastAPI as _FastAPI
-import uvicorn as _uvicorn
-import zmq as _zmq
+# from fastapi import FastAPI as _FastAPI
+# import uvicorn as _uvicorn
+# import zmq as _zmq
 
 
 class _ISender(metaclass=_ABCMeta):
