@@ -86,7 +86,7 @@ For instance, in the example below, we create and run an agent with 3 monitors a
 
 Monitors can be passed as either the class itself - ``` Agent``` - or an instance of the class like so: ``` Agent()```.
 
-Agents are subclasses of *threading.Thread* and can be stopped gracefully using the *Agent.event* attribute (see below.).
+Agents are subclasses of ```threading.Thread``` and can be stopped gracefully using the ```Agent.event``` attribute or the ```.stop_agent()``` method (see below.).
 
 ```python
 from time import sleep
