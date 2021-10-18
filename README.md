@@ -70,14 +70,17 @@ while True:
 
 ```python
 from pi_monitor.monitor.singleMonitors import Process
+
 process_monitor = Process()
+
 process_monitor.run()
+
 r_processes = process_monitor.running_processes()
 process_monitor.process_info(r_processes[2])
 ```
 
 ### Compound monitors
-You can create your own custom monitor using compound monitors. These can be run using the same .run() method as regular monitors.
+You can create your own custom monitor using compound monitors. These can be run using the same ```.run()``` method as regular monitors.
 
 ```python
 from time import sleep
@@ -115,6 +118,8 @@ Monitoring agents combine the monitors (e.g. CPU, Memory) and senders.
 Monitoring agents can contain as many monitors and senders as necessary.
 For instance, in the example below, we create and run an agent with 3 monitors and 2 senders.
 
+Monitors can be passed as either the class itself - ``` Agent``` - or an instance of the class like so: ``` Agent()```.
+
 Agents are subclasses of *threading.Thread* and can be stopped gracefully using the *Agent.event* attribute (see below.).
 
 ```python
@@ -137,13 +142,18 @@ ag_builder.add_monitor(Memory)
 ag_builder.add_sender(sqlite_sender)
 ag_builder.add_sender(file_sender)
 
+# Build the agent object
 agent = ag_builder.build()
 
+# Start monitoring
 agent.start()
-sleep(10) # do things
-agent.event.set() # stop monitor execution.
 
-# alternatively stop agent like this:
+sleep(10) # do things
+
+# Stop monitoring
+agent.event.set()
+
+# alternatively stop monitoring like this:
 agent.stop_agent()
 
 
@@ -156,12 +166,14 @@ from pi_monitor.monitor.agents import AgentBuilder
 from pi_monitor.monitor.senders import SenderFactory
 from pi_monitor.monitor.singleMonitors import CPU, Uptime, Process, Memory, Disk
 
+# Setup the various objects builders and factories
 ag_builder = AgentBuilder()
 ag_builder2 = AgentBuilder()
 ag_builder3 = AgentBuilder()
 
 sender_builder = SenderFactory()
 
+# Prepare the individual monitors and senders
 sqlite_sender = sender_builder.build(sender_type="sqlite", database_name="./db.sqlite")
 file_sender = sender_builder.build(sender_type="file", filepath="./file.txt")
 
@@ -174,14 +186,22 @@ ag_builder2.add_sender(sqlite_sender)
 ag_builder3.add_monitor(Memory())
 ag_builder3.add_sender(file_sender)
 
+# Build agent objects
 agent1 = ag_builder.build()
 agent2 = ag_builder2.build()
 agent3 = ag_builder3.build()
 
+# Start monitoring
 agent1.start()
 agent2.start()
 agent3.start()
+
+# Stop monitoring
+agent1.stop_agent()
+agent2.stop_agent()
+agent3.stop_agent()
 ```
+
 The data is stored in the database in json format according to the following schema:
 ```CREATE TABLE IF NOT EXISTS My_Raspberry_Pi_hostname (timestamp TEXT, context JSON, monitors TEXT, data json)```
 
