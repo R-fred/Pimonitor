@@ -16,6 +16,7 @@ from rich.console import Console as _Console
 from ._monitorABC import IMonitor as _IMonitor
 from .senders import _ISender as _ISender
 from .contextdata import ContextData as _ContextData
+from .singleMonitors import _MONITORS
 
 
 class Agent(_Thread):
@@ -44,14 +45,15 @@ class Agent(_Thread):
         output = None
 
         console = _Console()
-
+        check_classes = tuple(_MONITORS.values())
+        
         try:
             while not self.event.is_set():
                 if self.reload_context_every != None:
                     if _dt.datetime.now().timestamp() >= (self.context_data.timestamp + self._contextdata_reload):
                         self.context_data = _ContextData()
-                
-                initial = [m() for m in self.monitors if m.was_run == False]
+
+                initial = [m() if not isinstance(m, check_classes) else m for m in self.monitors]
                 if len(initial) > 0:
                     self.monitors = initial
                 
@@ -74,10 +76,11 @@ class Agent(_Thread):
                 self.event.set()
             console.print("\n> Execution stopped by user\n", style="red")       
 
-        except:
+        except BaseException as e:
             if not self.event.is_set():
                 self.event.set()
-            console.print("\nError\n")
+            console.print("\nError\n", style="red")
+            console.print(e)
 
         finally:
             if not self.event.is_set():

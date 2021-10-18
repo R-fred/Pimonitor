@@ -116,7 +116,6 @@ Monitoring agents can contain as many monitors and senders as necessary.
 For instance, in the example below, we create and run an agent with 3 monitors and 2 senders.
 
 Agents are subclasses of *threading.Thread* and can be stopped gracefully using the *Agent.event* attribute (see below.).
-Each agent runs in its own thread.
 
 ```python
 from time import sleep
@@ -150,6 +149,39 @@ agent.stop_agent()
 
 ```
 
+Each agent runs in its own thread. Each monitor can be run as an agent separately as shown below. The same sender can be reused between agents.
+
+```python
+from pi_monitor.monitor.agents import AgentBuilder
+from pi_monitor.monitor.senders import SenderFactory
+from pi_monitor.monitor.singleMonitors import CPU, Uptime, Process, Memory, Disk
+
+ag_builder = AgentBuilder()
+ag_builder2 = AgentBuilder()
+ag_builder3 = AgentBuilder()
+
+sender_builder = SenderFactory()
+
+sqlite_sender = sender_builder.build(sender_type="sqlite", database_name="./db.sqlite")
+file_sender = sender_builder.build(sender_type="file", filepath="./file.txt")
+
+ag_builder.add_monitor(CPU())
+ag_builder.add_sender(sqlite_sender)
+
+ag_builder2.add_monitor(Uptime())
+ag_builder2.add_sender(sqlite_sender)
+
+ag_builder3.add_monitor(Memory())
+ag_builder3.add_sender(file_sender)
+
+agent1 = ag_builder.build()
+agent2 = ag_builder2.build()
+agent3 = ag_builder3.build()
+
+agent1.start()
+agent2.start()
+agent3.start()
+```
 The data is stored in the database in json format according to the following schema:
 ```CREATE TABLE IF NOT EXISTS My_Raspberry_Pi_hostname (timestamp TEXT, context JSON, monitors TEXT, data json)```
 
