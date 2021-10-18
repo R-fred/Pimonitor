@@ -79,40 +79,6 @@ r_processes = process_monitor.running_processes()
 process_monitor.process_info(r_processes[2])
 ```
 
-### Compound monitors
-You can create your own custom monitor using compound monitors. These can be run using the same ```.run()``` method as regular monitors.
-
-```python
-from time import sleep
-from pi_monitor.compoundMonitors import CoumpoundMonitor as CM
-from pi_monitor.monitor.singleMonitors import CPU, Uptime, Process, Memory, Disk
-
-Monitor = CM(name="My_Monitor", monitors=[CPU(), Uptime(), Process(), Memory(), Disk()])
-while True:
-    CM.run()
-    print(CM.as_dict())
-    sleep(1)
-```
-Alternatively:
-
-```python
-from time import sleep
-from pi_monitor.compoundMonitors import CoumpoundMonitor as CM
-from pi_monitor.monitor.singleMonitors import CPU, Uptime, Process, Memory, Disk
-
-cpu = CPU()
-uptime = Uptime()
-proc = Process()
-memory = Memory()
-disk = Disk()
-
-Monitor = CM(name="My_Monitor", monitors=[cpu, uptime, proc, memory, disk])
-while True:
-    CM.run()
-    print(CM.as_dict())
-    sleep(1)
-```
-
 ### Monitoring agents
 Monitoring agents combine the monitors (e.g. CPU, Memory) and senders.
 Monitoring agents can contain as many monitors and senders as necessary.
@@ -226,3 +192,39 @@ conn.close()
 ```
 
 For more details on how to retrieve data from json data structures in sqlite read [here](https://stackoverflow.com/questions/58519714/how-to-extract-properly-when-sqlite-json-has-value-as-an-array)
+
+### Deprecated - Compound monitors
+You can create your own custom monitor using compound monitors. These can be run using the same ```.run()``` method as regular monitors.
+
+**Deprecation notice: you can achieve the same by building an agent without senders.** Doing so comes with the nice benefit that your monitor will run in its own thread (not the case with compound monitors).
+
+```python
+from time import sleep
+from pi_monitor.compoundMonitors import CoumpoundMonitor as CM
+from pi_monitor.monitor.singleMonitors import CPU, Uptime, Process, Memory, Disk
+
+Monitor = CM(name="My_Monitor", monitors=[CPU(), Uptime(), Process(), Memory(), Disk()])
+while True:
+    CM.run()
+    print(CM.as_dict())
+    sleep(1)
+```
+Alternatively:
+
+```python
+from time import sleep
+from pi_monitor.compoundMonitors import CoumpoundMonitor as CM
+from pi_monitor.monitor.singleMonitors import CPU, Uptime, Process, Memory, Disk
+
+cpu = CPU()
+uptime = Uptime()
+proc = Process()
+memory = Memory()
+disk = Disk()
+
+Monitor = CM(name="My_Monitor", monitors=[cpu, uptime, proc, memory, disk])
+while True:
+    CM.run()
+    print(CM.as_dict())
+    sleep(1)
+```
