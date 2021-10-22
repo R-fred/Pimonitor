@@ -21,7 +21,7 @@ from .singleMonitors import _MONITORS
 
 class Agent(_Thread):
 
-    def __init__(self, interval: _Optional[_Union[int, float]] = 5, queue_length: int = 15, reload_context_every: _Optional[float] = None) -> None:
+    def __init__(self, interval: _Optional[_Union[int, float]] = 5, queue_length: int = 100, reload_context_every: _Optional[float] = None) -> None:
 
         # Removed on_change functionality:
         # on init: on_change: bool = True,
@@ -46,7 +46,7 @@ class Agent(_Thread):
 
         console = _Console()
         check_classes = tuple(_MONITORS.values())
-        
+
         try:
             while not self.event.is_set():
                 if self.reload_context_every != None:

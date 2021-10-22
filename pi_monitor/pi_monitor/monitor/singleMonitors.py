@@ -1,5 +1,6 @@
 from dataclasses import dataclass as _dataclass, field as _field
 import datetime as _dt
+import re as _re
 from typing import Dict as _Dict, List as _List, NamedTuple as _NamedTuple, Optional as _Optional, Any as _Any, Union as _Union
 
 import psutil as _ps
@@ -93,17 +94,25 @@ class CPU(_IMonitor):
     average_load: _Optional[_Dict[str, float]] = None
     cpu_percent: _Optional[_List[_Dict[str, float]]] = None
     per_cpu: bool = False
+    temperature: _Optional[float] = None
 
     def __post_init__(self):
         self.mtype: str = "CPU"
 
 
     def run(self) -> _IMonitor:
-        # TODO: add cpu temperature check for raspberry pi.
         try:
             self.timestamp = _utc_timestamp()
             self.average_load = self._get_average_load()
             self.cpu_percent = self._get_cpu_percent()
+
+            try: # temperature check for the raspberry pi.
+                f = open('/sys/class/thermal/thermal_zone0/temp', mode="r")
+                temp: str = _re.findall(pattern="[0-9].*", string=f.readlines()[0])[0]
+                self.temperature = int(temp)/1000
+            except:
+                self.temperature = None
+
             self.was_run = True
         except:
             raise
@@ -111,7 +120,7 @@ class CPU(_IMonitor):
             return self
 
   
-    def as_dict(self, timestamp_as_string: bool = True):
+    def as_dict(self, timestamp_as_string: bool = True) -> _Optional[_Dict[str, _Any]]:
         output = None
         ts = self.timestamp
         try:
@@ -121,7 +130,8 @@ class CPU(_IMonitor):
             output = {"id": self.id,
                     "timestamp": ts,
                     "cpu_percent": {"per_cpu": self.per_cpu, "cpu_percent": self.cpu_percent},
-                    "average_load": self.average_load
+                    "average_load": self.average_load,
+                    "temperature": self.temperature
                     }
         except:
             raise
@@ -398,7 +408,7 @@ class Process(_IMonitor):
         
         return False
 
-_MONITORS = {"Uptime": Uptime, "CPU": CPU, "Memory": Memory, "Disk": Disk, "Process": Process}
+_MONITORS = {"uptime": Uptime, "cpu": CPU, "memory": Memory, "disk": Disk, "process": Process}
 
 # ######### QUICK TESTS #########
 
