@@ -44,7 +44,7 @@ class PubSubSender(_ISender):
 
 class FileSender(_ISender):
     
-    def __init__(self, filepath: str, append: bool = True):
+    def __init__(self, filepath: str = f'~/{str(_dt.datetime.now())}-monitoring.txt', append: bool = True):
         super().__init__()
         self.file_path = filepath
         self.append = append
@@ -67,7 +67,7 @@ class FileSender(_ISender):
 
 class SQLiteSender(_ISender):
 
-    def __init__(self, database_name: str, table_name: _Optional[str] = None):
+    def __init__(self, database_name: str = '~/{str(_dt.datetime.now())}-monitoring.sqlite', table_name: _Optional[str] = None):
         super().__init__()
         self.database_name = database_name
         self.table_name = table_name
@@ -125,10 +125,11 @@ _SENDERTYPES: _List[_Any] = [k.lower() for k, v in _SENDERS.items()]
 class SenderFactory:
     
     @staticmethod
-    def build(sender_type: str, **kwargs) -> _Optional[_ISender]:
+    def build(sender_type: str, *args, **kwargs) -> _Optional[_ISender]:
+        output = None
         try:
             if sender_type.lower() in _SENDERTYPES:
-                output = _SENDERS[sender_type.lower()](**kwargs)
+                output = _SENDERS[sender_type.lower()](*args, **kwargs)
         except:
             raise
         finally:
