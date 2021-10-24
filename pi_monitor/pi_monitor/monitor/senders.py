@@ -23,7 +23,7 @@ class _ISender(metaclass=_ABCMeta):
     def send(self, message: _Any):
         pass
 
-
+# TODO: Implement
 class RESTSender(_ISender):# have REST API running separately and POST to the API, GET collects the information from POST
 
     def __init__(self):
@@ -32,7 +32,7 @@ class RESTSender(_ISender):# have REST API running separately and POST to the AP
     def send(self, url: str = "localhost", port: int = 8000, message: str = "REST sender"):
         return f"Message sent on {url}:{port}. Message: {message}. Date and time: {str(_dt.datetime.now())}"
 
-
+# TODO: Implement
 class PubSubSender(_ISender):
 
     def __init__(self):
@@ -44,9 +44,14 @@ class PubSubSender(_ISender):
 
 class FileSender(_ISender):
     
-    def __init__(self, filepath: str = f'~/{str(_dt.datetime.now())}-monitoring.txt', append: bool = True):
+    def __init__(self, filepath: _Optional[str] = None, append: bool = True):
         super().__init__()
         self.file_path = filepath
+
+        if self.file_path == None:
+            fpath = f'./{str(_dt.datetime.today())}-monitoring.txt'.replace(":", "-").replace(" ", "_")
+            self.file_path = fpath
+
         self.append = append
 
     def send(self, message: _Any):
@@ -67,9 +72,14 @@ class FileSender(_ISender):
 
 class SQLiteSender(_ISender):
 
-    def __init__(self, database_name: str = '~/{str(_dt.datetime.now())}-monitoring.sqlite', table_name: _Optional[str] = None):
+    def __init__(self, databasepath: _Optional[str] = None, table_name: _Optional[str] = None):
         super().__init__()
-        self.database_name = database_name
+        self.database_name = databasepath
+
+        if self.database_name == None:
+            fpath = f'./{str(_dt.datetime.today())}-monitoring.sqlite'.replace(":", "-").replace(" ", "_")
+            self.database_name = fpath
+
         self.table_name = table_name
     
     def send(self, message: str):
@@ -111,6 +121,7 @@ class SQLiteSender(_ISender):
             raise
 
 
+# TODO: Implement.
 class ConsoleSender(_ISender):
 
     def __init__(self):
@@ -119,8 +130,10 @@ class ConsoleSender(_ISender):
     def send(self, message: str = f"Message sent to stdout. Message: 'This is a message'. Date and time: {str(_dt.datetime.now())}") -> None:
         print(message)
 
+
 _SENDERS:  _Dict[str, _Any]= {"rest": RESTSender, "pubsub": PubSubSender, "console": ConsoleSender, "file": FileSender, "sqlite": SQLiteSender}
 _SENDERTYPES: _List[_Any] = [k.lower() for k, v in _SENDERS.items()]
+
 
 class SenderFactory:
     

@@ -11,7 +11,7 @@ from threading import Thread as _Thread, Event as _Event
 from time import sleep as _sleep
 from typing import Dict as _Dict, List as _List, Any as _Any, Optional as _Optional, Deque as _Deque, Union as _Union
 
-from rich.console import Console as _Console
+# from rich.console import Console as _Console
 
 from ._monitorABC import IMonitor as _IMonitor
 from .senders import _ISender as _ISender
@@ -40,11 +40,13 @@ class Agent(_Thread):
 
         self._valuestore: _Deque = _deque(maxlen=self.queue_length) # Store monitor values - was originally added to support on_change functionality.
         self.event: _Event = _Event()
+
+        self.daemon = True
     
     def run(self) -> None:
         output = None
 
-        console = _Console()
+        # console = _Console()
         check_classes = tuple(_MONITORS.values())
 
         try:
@@ -74,13 +76,13 @@ class Agent(_Thread):
         except KeyboardInterrupt:
             if not self.event.is_set():
                 self.event.set()
-            console.print("\n> Execution stopped by user\n", style="red")       
+            print("\n> Execution stopped by user\n")       
 
         except BaseException as e:
             if not self.event.is_set():
                 self.event.set()
-            console.print("\nError\n", style="red")
-            console.print(e)
+            print("\nError\n")
+            print(e)
 
         finally:
             if not self.event.is_set():
