@@ -33,6 +33,23 @@ Currently, you can send your monitoring data to a file or an sqlite database (se
 
 ## Usage examples
 
+### The commandline tool
+pi_monitor provides a simple command line tool to conviniently monitor your raspberry pi (or other computer).
+It can be run like so:
+
+```
+pimonitor --cpu --memory --send-to-file
+
+```
+
+Invoking the tool with the options above will monitor the cpu and memory and send the results to a file. by default the file name is automatically created.
+
+Or, if you want to set it up, forget it and continue your work:
+```
+pimonitor --cpu --memory --send-to-file &
+
+```
+
 ### Getting data about your Raspberry pi
 Getting context data about your raspberry pi is useful, especially in industrial scenarii where your devices might be located anywhere around the globe.
 Getting this data every time you run a monitor is computationally expensive. Pi Monitor defines the *ContextData* class for that.

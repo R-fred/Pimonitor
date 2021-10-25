@@ -1,12 +1,13 @@
 from setuptools import setup
 
 setup(name='pi_monitor',
-      version='0.16.5',
+      entry_points={'console_scripts': ['pimonitor = pi_monitor.pimonitor:main'],},
+      version='0.17.7',
       description='A package to monitor your raspberry pi and more!',
       url='',
       author='Frederick Chesneau',
       author_email='fchesneau@gmail.com',
       license='MIT',
-      packages=['pi_monitor', 'pi_monitor.monitor', 'pi_monitor.server', "pi_monitor.cli"],
+      packages=['pi_monitor', 'pi_monitor.monitor', 'pi_monitor.server'],
       zip_safe=False,
       install_requires=['psutil', 'rich'])

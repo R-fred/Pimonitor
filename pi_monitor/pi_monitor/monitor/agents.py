@@ -41,7 +41,7 @@ class Agent(_Thread):
         self._valuestore: _Deque = _deque(maxlen=self.queue_length) # Store monitor values - was originally added to support on_change functionality.
         self.event: _Event = _Event()
 
-        self.daemon = True
+        self.daemon = False # True
     
     def run(self) -> None:
         output = None

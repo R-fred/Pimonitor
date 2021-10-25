@@ -1,13 +1,11 @@
-#!/usr/bin/python3
-
 import argparse as _argparse
 import sys as _sys
 import json as _json
 import re as _re
 
-from monitor.agents import AgentBuilder as _AgentBuilder
-from monitor.senders import SenderFactory as _SenderFactory
-from monitor.singleMonitors import _MONITORS
+from .monitor.agents import AgentBuilder as _AgentBuilder
+from .monitor.senders import SenderFactory as _SenderFactory
+from .monitor.singleMonitors import _MONITORS
 
 # define function to run
 def main():
