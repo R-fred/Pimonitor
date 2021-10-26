@@ -39,15 +39,14 @@ It can be run like so:
 
 ```
 pimonitor --cpu --memory --send-to-file
-
 ```
 
+When used without filename, **pi_monitor** automatically generates a file in the current directory.
 Invoking the tool with the options above will monitor the cpu and memory and send the results to a file. by default the file name is automatically created.
 
 Or, if you want to set it up, forget it and continue your work:
 ```
 pimonitor --cpu --memory --send-to-file &
-
 ```
 
 ### Getting data about your Raspberry pi
