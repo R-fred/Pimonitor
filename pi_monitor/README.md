@@ -34,19 +34,35 @@ Currently, you can send your monitoring data to a file or an sqlite database (se
 ## Usage examples
 
 ### The commandline tool
-pi_monitor provides a simple command line tool to conviniently monitor your raspberry pi (or other computer).
+```pimonitor``` provides a simple command line tool to conviniently monitor your raspberry pi (or other computer).
 It can be run like so:
 
 ```
-pimonitor --cpu --memory --send-to-file
+pimonitor run --monitors cpu memory --send-to file --send-to sqlite
 ```
 
-When used without filename, **pi_monitor** automatically generates a file in the current directory.
-Invoking the tool with the options above will monitor the cpu and memory and send the results to a file. by default the file name is automatically created.
+```pimonitor``` automatically generates a file or sqlite database file in the current directory.
+Invoking the tool with the options above will monitor the cpu and memory and send the results to a file and sqlite database.
 
 Or, if you want to set it up, forget it and continue your work:
 ```
-pimonitor --cpu --memory --send-to-file &
+pimonitor run --monitors cpu memory --send-to file --send-to sqlite &
+```
+
+By default, the interval between two data collection is 30 seconds. It can be adjusted like so:
+```
+pimonitor run --interval 5 --monitors cpu memory --send-to file --send-to sqlite &
+```
+
+The context data is by default collected once at the begining and never again. You can modify this behaviour by setting the **--refresh-context-every** option. The **--refresh-context-every** takes a float as argument. The unit is seconds.
+Here is an example setting the refresh rate at 20 minut
+```
+pimonitor run --refresh-context-every 1200 --monitors cpu memory --send-to file --send-to sqlite &
+```
+
+```pimonitor``` can be stopped easily by invoking the stop command. Note that this will kill the process where pimonitor is running.
+```
+pimonitor stop
 ```
 
 ### Getting data about your Raspberry pi
