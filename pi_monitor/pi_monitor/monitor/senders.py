@@ -4,6 +4,8 @@ import time as _time
 from typing import Dict as _Dict, List as _List, Any as _Any, Optional as _Optional
 from io import BytesIO as _BytesIO
 import json as _json
+from os.path import expanduser as _expanduser
+import platform as _pf
 import re as _re
 import sqlite3 as _sqlite3
 from uuid import uuid4 as _uuid4
@@ -49,7 +51,7 @@ class FileSender(_ISender):
         self.file_path = filepath
 
         if self.file_path == None:
-            fpath = f'./{str(_dt.datetime.today())}-monitoring.txt'.replace(":", "-").replace(" ", "_")
+            fpath = f'{_expanduser()}/{_pf.node()}-monitoring.txt'.replace(":", "-").replace(" ", "_")
             self.file_path = fpath
 
         self.append = append
@@ -77,7 +79,7 @@ class SQLiteSender(_ISender):
         self.database_name = databasepath
 
         if self.database_name == None:
-            fpath = f'./{str(_dt.datetime.today())}-monitoring.sqlite'.replace(":", "-").replace(" ", "_")
+            fpath = f'{_expanduser()}/{_pf.node()}-monitoring.sqlite'.replace(":", "-").replace(" ", "_")
             self.database_name = fpath
 
         self.table_name = table_name

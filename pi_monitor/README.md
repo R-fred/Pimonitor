@@ -41,7 +41,7 @@ It can be run like so:
 pimonitor run --monitors cpu memory --send-to file --send-to sqlite
 ```
 
-```pimonitor``` automatically generates a file or sqlite database file in the current directory.
+```pimonitor``` automatically generates a file or sqlite database file in the home directory of the current user.
 Invoking the tool with the options above will monitor the cpu and memory and send the results to a file and sqlite database.
 
 Or, if you want to set it up, forget it and continue your work:
@@ -62,7 +62,7 @@ pimonitor run --refresh-context-every 1200 --monitors cpu memory --send-to file 
 
 ```pimonitor``` can be stopped easily by invoking the stop command. Note that this will kill the process where pimonitor is running.
 ```
-pimonitor stop
+pimonitor kill
 ```
 
 ### Getting data about your Raspberry pi
