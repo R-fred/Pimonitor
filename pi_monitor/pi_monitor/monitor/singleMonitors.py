@@ -469,7 +469,7 @@ class Network(_IMonitor):
             return output
 
 
-    def _get_open_ports(self) -> _Optional[_Dict[str, _List[int], int]]:
+    def _get_open_ports(self) -> _Optional[_Dict[str, _Union[_List[int], int]]]:
         output = None
         try:
             tcp = [c.laddr.port for c in _ps.net_connections('tcp4') if c.status == 'LISTEN' and c.family == 2 and c.laddr.ip == '0.0.0.0']
