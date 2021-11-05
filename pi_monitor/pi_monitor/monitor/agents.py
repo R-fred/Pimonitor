@@ -81,7 +81,8 @@ class Agent(_Thread):
         except BaseException as e:
             if not self.event.is_set():
                 self.event.set()
-            print("\nError\n")
+            print(f"\nError\n")
+            print(f"senders: {self.senders}")
             print(e)
 
         finally:
@@ -155,17 +156,3 @@ class AgentBuilder(_IAgentBuilder):
         product = self._product
         self.reset()
         return product
-
-
-# from pi_monitor.monitor.singleMonitors import CPU, Uptime, Memory, Disk, Process
-
-
-# ag_builder = AgentBuilder()
-# ag_builder.add_monitor(Uptime)
-# ag_builder.add_monitor(CPU)
-# ag_builder.add_monitor(Memory)
-# ag_builder.add_monitor(Disk)
-# ag_builder.add_monitor(Process)
-# agent = ag_builder.build()
-
-# agent.run()

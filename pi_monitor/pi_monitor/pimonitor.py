@@ -3,12 +3,14 @@ import os as _os
 from os.path import expanduser as _expanduser
 import re as _re
 import sys as _sys
+import time as _time
 
 import click
 
-from monitor.agents import AgentBuilder as _AgentBuilder
-from monitor.senders import SenderFactory as _SenderFactory
-from monitor.singleMonitors import _MONITORS
+from .monitor.agents import AgentBuilder as _AgentBuilder
+from .monitor.senders import SenderFactory as _SenderFactory
+from .monitor.singleMonitors import _MONITORS
+from .monitor.senders import _SENDERTYPES, _SENDERS
 
 home_dict = _expanduser("~")
 
@@ -31,10 +33,15 @@ def run(ctx, interval, refresh_context_every, monitors, send_to):
 
     try:
         global _MONITORS
+        global _SENDERTYPES
+        global _SENDERS
+
         _MONITORS = {k.lower(): v for k, v in _MONITORS.items()} # keys are mixed case although they are lower case in code.
         
         monitors = [_ for _ in monitors if _ in _MONITORS.keys()]
         senders = send_to
+        if type(send_to) != list or type(send_to) != tuple:
+            send_to = (send_to,)
 
         if len(senders) == 0:
             click.echo("At least one sender is required.")
@@ -49,7 +56,6 @@ def run(ctx, interval, refresh_context_every, monitors, send_to):
             agent_builder.add_monitor(_MONITORS[m]())
         
         for s in senders:
-            sender_name = f"send_to_{s}"
             sender = sender_factory.build(sender_type=s)
             agent_builder.add_sender(sender)
 
@@ -80,6 +86,7 @@ def kill():
     _os.kill(int(pm_pid))
 
     click.echo("...pimonitor is now stopped.")
+
 
 if __name__ == '__main__':
     cli(obj={})

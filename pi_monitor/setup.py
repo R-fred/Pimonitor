@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(name='pi_monitor',
       entry_points={'console_scripts': ['pimonitor = pi_monitor.pimonitor:cli'],},
-      version='0.21',
+      version='0.22',
       description='A package to monitor your raspberry pi and more!',
       url='',
       author='Frederick Chesneau',

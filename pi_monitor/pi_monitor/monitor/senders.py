@@ -1,5 +1,6 @@
 from abc import ABCMeta as _ABCMeta, abstractmethod as _abstractmethod
 import datetime as _dt
+from genericpath import exists
 import time as _time
 from typing import Dict as _Dict, List as _List, Any as _Any, Optional as _Optional
 from io import BytesIO as _BytesIO
@@ -51,7 +52,7 @@ class FileSender(_ISender):
         self.file_path = filepath
 
         if self.file_path == None:
-            fpath = f'{_expanduser()}/{_pf.node()}-monitoring.txt'.replace(":", "-").replace(" ", "_")
+            fpath = f'{_expanduser("~")}/{_pf.node()}_monitoring.txt'.replace(":", "-").replace(" ", "_")
             self.file_path = fpath
 
         self.append = append
@@ -77,13 +78,17 @@ class SQLiteSender(_ISender):
     def __init__(self, databasepath: _Optional[str] = None, table_name: _Optional[str] = None):
         super().__init__()
         self.database_name = databasepath
-
-        if self.database_name == None:
-            fpath = f'{_expanduser()}/{_pf.node()}-monitoring.sqlite'.replace(":", "-").replace(" ", "_")
-            self.database_name = fpath
-
         self.table_name = table_name
-    
+
+        node = _pf.node().replace(":", "_").replace(" ", "_").replace(".", "_").replace("-", "_")
+
+        if self.database_name == None or len(databasepath) == 0:
+            fpath = f'{_expanduser("~")}/{node}_monitoring.sqlite'
+            self.database_name = fpath
+        
+        if self.table_name == None or len(self.table_name) == 0:
+            self.table_name = node
+
     def send(self, message: str):
         """[summary]
 
@@ -100,10 +105,6 @@ class SQLiteSender(_ISender):
             msg = _json.loads(message)
             data = msg["monitoring_data"]
             ctxt = msg["context_data"]
-            if self.table_name == None:
-                self.table_name = ctxt['localhost_name']
-                self.table_name = self.table_name.replace("-", "_")
-                self.table_name = self.table_name.replace(".", "_")
 
             db_table = f"CREATE TABLE IF NOT EXISTS {self.table_name} (timestamp TEXT, context JSON, monitors TEXT, data json)"
 
@@ -119,7 +120,6 @@ class SQLiteSender(_ISender):
 
         except:
             print("----> Error in SQLiteSender <----")
-            print(stmt)
             raise
 
 
@@ -144,7 +144,12 @@ class SenderFactory:
         output = None
         try:
             if sender_type.lower() in _SENDERTYPES:
-                output = _SENDERS[sender_type.lower()](*args, **kwargs)
+                if len(args) > 0 or len(kwargs) > 0:
+                    output = _SENDERS[sender_type.lower()]
+                    output = output(*args, **kwargs)
+                else:
+                    output = _SENDERS[sender_type.lower()]
+                    output = output()
         except:
             raise
         finally:
@@ -152,9 +157,5 @@ class SenderFactory:
 
 
 # new_sender = SenderFactory().build("SQlite")
-# print(new_sender.send("new_db.sqlite", "This is a message being written to an sqlite db"))
-# print(new_sender.id)
-
-# new_sender = SenderFactory().build("File")
-# print(new_sender.send("~/log.txt", "This is a message being written to a file"))
+# print(new_sender.send(message='{"context_data": {"one":"one"}, "monitoring_data": {"two": "This is a message being written to an sqlite db"}}'))
 # print(new_sender.id)

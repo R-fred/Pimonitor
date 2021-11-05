@@ -408,7 +408,126 @@ class Process(_IMonitor):
         
         return False
 
-_MONITORS = {"uptime": Uptime, "cpu": CPU, "memory": Memory, "disk": Disk, "process": Process}
+
+class Network(_IMonitor):
+    """Class to monitor processes. Can also be used to retrieve informatiin about a running process.
+
+    Returns:
+        Process: returns a Process class
+    """
+    interfaces: _List[str] = ["eth0", "wlan0"]
+    n_open_ports: _Optional[int] = None
+    open_ports: _Optional[_List[int]] = None
+    nic_addresses: _Optional[_Dict[str, _Any]] = None
+    network_stats: _Optional[_Any] = None
+
+    def __post_init__(self):
+        self.mtype: str = "Network"
+
+
+    def run(self) -> _IMonitor:
+        try:
+            self.timestamp = _utc_timestamp()
+            self.open_ports = self._get_open_ports()
+            self.n_open_ports = self._get_n_open_ports()
+            self.nic_addresses = self._get_if_addrs()
+            self.network_stats = self._get_network_statistics()
+            self.was_run = True
+        except:
+            raise
+        finally:
+            return self
+
+
+    def as_dict(self, timestamp_as_string: bool = True) -> _Optional[_Dict[str, _Any]]:
+        output = None
+        ts = self.timestamp
+
+        try:
+            if timestamp_as_string:
+                ts = str(_dt.datetime.fromtimestamp(ts))
+
+            output = {"id": self.id,
+                    "timestamp": ts,
+                    "open_ports": {"n_open_ports": self.n_open_ports, "open_ports": self.open_ports},
+                    "interface_addresses": self.nic_addresses,
+                    "statistics": self.network_stats._asdict()
+                    }
+        except:
+            raise
+        finally:
+            return output
+
+
+    def _get_n_open_ports(self) -> _Optional[_Dict[str, int]]:
+        output = None
+        try:
+            output = {"tcp": len(self.open_ports["tcp"]), "udp": len(self.open_ports["udp"])}
+        except:
+            raise
+        finally:
+            return output
+
+
+    def _get_open_ports(self) -> _Optional[_Dict[str, _List[int], int]]:
+        output = None
+        try:
+            tcp = [c.laddr.port for c in _ps.net_connections('tcp4') if c.status == 'LISTEN' and c.family == 2 and c.laddr.ip == '0.0.0.0']
+            udp = [c.laddr.port for c in _ps.net_connections('udp4') if c.status == 'LISTEN' and c.family == 2 and c.laddr.ip == '0.0.0.0'] 
+            
+            if type(tcp) == int:
+                tcp = [tcp,]
+            if type(udp) == int:
+                udp = [udp,]
+
+            output = {"tcp": tcp, "udp": udp}
+        except:
+            raise
+        finally:
+            return output
+
+
+    def _get_if_addrs(self) -> _Dict[str, _Any]:
+        output = None
+
+        def _get_active(v) -> _List[_Any]:
+            return [i._asdict() for i in v if i.broadcast != None or i.ptp != None]
+
+        try:
+            #TODO: add the results of ps.net_if_stats() to get if interface is up, duplex and speed.
+            output = {k: _get_active(v) for k, v in _ps.net_if_addrs().items()}
+        except:
+            raise
+        finally:
+            return output
+    
+
+    def _get_network_statistics(self) -> _Optional[_Any]:
+        output = None
+
+        try:
+            output = _ps.net_io_counters()
+        except:
+            raise
+        finally:
+            return output
+
+
+    def __eq__(self, other):
+        if isinstance(other, Network):
+            id_check = self.id == other.id
+            open_ports_check = self.open_ports == other.open_ports
+            nic_addresses_check = self.nic_addresses == other.nic_addresses
+            network_stats_check = self.network_stats == other.network_stats
+
+            output = id_check and nic_addresses_check and open_ports_check and network_stats_check
+            
+            return output
+        
+        return False
+
+
+_MONITORS = {"uptime": Uptime, "cpu": CPU, "memory": Memory, "disk": Disk, "process": Process, "network": Network}
 
 # ######### QUICK TESTS #########
 
@@ -449,3 +568,8 @@ _MONITORS = {"uptime": Uptime, "cpu": CPU, "memory": Memory, "disk": Disk, "proc
 # disk.run()
 # print(disk.io_counters)
 # print(disk.partitions)
+
+# print("\n----- Network Monitor ---")
+# network = Network()
+# network.run()
+# print(network.as_dict())
