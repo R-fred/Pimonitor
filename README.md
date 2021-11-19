@@ -38,7 +38,7 @@ Currently, you can send your monitoring data to a file or an sqlite database (se
 It can be run like so:
 
 ```
-pimonitor run --monitors cpu memory --send-to file --send-to sqlite
+pimonitor run --monitor cpu --monitor memory --send-to file --send-to sqlite
 ```
 
 ```pimonitor``` automatically generates a file or sqlite database file in the home directory of the current user.
@@ -46,18 +46,18 @@ Invoking the tool with the options above will monitor the cpu and memory and sen
 
 Or, if you want to set it up, forget it and continue your work:
 ```
-pimonitor run --monitors cpu memory --send-to file --send-to sqlite &
+pimonitor run --monitor cpu --monitor memory --send-to file --send-to sqlite &
 ```
 
 By default, the interval between two data collection is 30 seconds. It can be adjusted like so:
 ```
-pimonitor run --interval 5 --monitors cpu memory --send-to file --send-to sqlite &
+pimonitor run --interval 5 --monitor cpu --monitor memory --send-to file --send-to sqlite &
 ```
 
 The context data is by default collected once at the begining and never again. You can modify this behaviour by setting the **--refresh-context-every** option. The **--refresh-context-every** takes a float as argument. The unit is seconds.
 Here is an example setting the refresh rate at 20 minut
 ```
-pimonitor run --refresh-context-every 1200 --monitors cpu memory --send-to file --send-to sqlite &
+pimonitor run --refresh-context-every 1200 --monitor cpu --monitor memory --send-to file --send-to sqlite &
 ```
 
 ```pimonitor``` can be stopped easily by invoking the stop command. Note that this will kill the process where pimonitor is running.

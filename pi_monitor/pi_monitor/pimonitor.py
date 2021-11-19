@@ -25,11 +25,10 @@ def cli(ctx):
 @cli.command()
 @click.option("--interval", type=float, default=30, nargs=1)
 @click.option("--refresh-context-every", type=float, nargs=1)
-@click.option("--monitors", nargs=0)
-@click.argument("monitors", nargs=-1) # trick (incl. nargs=0 on the previous line) to get multiple arguments working.
+@click.option("--monitor", multiple=True)
 @click.option("--send-to", multiple=True)
 @click.pass_context
-def run(ctx, interval, refresh_context_every, monitors, send_to):
+def run(ctx, interval, refresh_context_every, monitor, send_to):
 
     try:
         global _MONITORS
@@ -38,10 +37,15 @@ def run(ctx, interval, refresh_context_every, monitors, send_to):
 
         _MONITORS = {k.lower(): v for k, v in _MONITORS.items()} # keys are mixed case although they are lower case in code.
         
-        monitors = [_ for _ in monitors if _ in _MONITORS.keys()]
-        senders = send_to
+        monitors = monitor
+        if type(monitor) != list or type(monitor) != tuple:
+            monitor = (monitor,)
+        
         if type(send_to) != list or type(send_to) != tuple:
             send_to = (send_to,)
+            
+        monitors = [_ for _ in monitors if _ in _MONITORS.keys()]
+        senders = send_to
 
         if len(senders) == 0:
             click.echo("At least one sender is required.")
