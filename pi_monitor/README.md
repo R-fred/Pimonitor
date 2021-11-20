@@ -1,5 +1,5 @@
-# Pi monitor
-Pi monitor provides a high level API to monitor various aspects of your Raspberry pi hardware.
+# pimonitor
+```pimonitor``` provides a high level API to monitor various aspects of your Raspberry pi hardware.
 It abstracts calls to the platform, socket and psutil packages and tries to groups them in logical monitor units:
 
 - CPU
@@ -7,13 +7,19 @@ It abstracts calls to the platform, socket and psutil packages and tries to grou
 - Disk
 - Process
 - Uptime
-- Network (coming soon)
+- Network
 
 All monitors can be run using one unique method ```Monitor.run()``` with *Monitor* being one of the above (see examples below).
 
-Pi monitor also implements Agents to allow you to run one or more monitors at given intervals. Agents also contain the necessary logic to send messages to your desired monitoring channel.
+```pimonitor``` allows to send monitoring data via a variety of mechanisms. At present the following are supported:
 
-Finally, Pi Monitor provides a CLI interface to monitor your Raspberry pi.
+- File
+- Sqlite DB
+- Rabbitmq (using PlainCredentials, i.e. username and password)
+
+```pimonitor``` also implements Agents to allow you to run one or more monitors at given intervals. Agents also contain the necessary logic to send messages to your desired monitoring channel.
+
+Finally, ```pimonitor``` provides a CLI interface to monitor your Raspberry pi.
 
 
 Pi monitor is hosted at:
@@ -58,6 +64,12 @@ The context data is by default collected once at the begining and never again. Y
 Here is an example setting the refresh rate at 20 minut
 ```
 pimonitor run --refresh-context-every 1200 --monitor cpu --monitor memory --send-to file --send-to sqlite &
+```
+
+You can also pass arguments to the senders. ```pimonitor``` assumes that the ```--send-to``` and ```--send-to-options``` are in the same order. Options are used as follows:
+
+```
+pimonitor run --monitor cpu --send-to rabbitmq --send-to-options '{"host": "localhost", "port": 5672, "credentials":["test", "test"]}'
 ```
 
 ```pimonitor``` can be stopped easily by invoking the stop command. Note that this will kill the process where pimonitor is running.
