@@ -51,7 +51,7 @@ class Uptime(IMonitor):
         self.mtype: str = "Uptime"
 
 
-    def run(self) -> _IMonitor:
+    def run(self) -> IMonitor:
         try:
             self.timestamp = _utc_timestamp()
             self.boot_time = _ps.boot_time()
@@ -125,7 +125,7 @@ class CPU(IMonitor):
         self.mtype: str = "CPU"
 
 
-    def run(self) -> _IMonitor:
+    def run(self) -> IMonitor:
         try:
             self.timestamp = _utc_timestamp()
             self.average_load = self._get_average_load()
@@ -221,7 +221,7 @@ class Memory(IMonitor):
         self.mtype: str = "Memory"
 
 
-    def run(self) -> _IMonitor:
+    def run(self) -> IMonitor:
         try:
             self.timestamp = _utc_timestamp()
             self.virtual: _NamedTuple = _ps.virtual_memory()
@@ -281,7 +281,7 @@ class Disk(IMonitor):
         self.mtype: str = "Disk" # get_monitor_name(monitor=self)
 
 
-    def run(self) -> _IMonitor:
+    def run(self) -> IMonitor:
         try:
             self.timestamp: float = _utc_timestamp()
             self.io_counters: _NamedTuple = _ps.disk_io_counters()
@@ -345,7 +345,7 @@ class Process(IMonitor):
         self.mtype: str = "Process"
 
 
-    def run(self) -> _IMonitor:
+    def run(self) -> IMonitor:
         try:
             self.timestamp = _utc_timestamp()
             self.process_list = self._get_process_list()
@@ -432,7 +432,7 @@ class Process(IMonitor):
         
         return False
 
-@_dataclass
+
 class Network(IMonitor):
     """Class to monitor processes. Can also be used to retrieve informatiin about a running process.
 
@@ -449,7 +449,7 @@ class Network(IMonitor):
         self.mtype: str = "Network"
 
 
-    def run(self) -> _IMonitor:
+    def run(self) -> IMonitor:
         try:
             self.timestamp = _utc_timestamp()
             self.open_ports = self._get_open_ports()

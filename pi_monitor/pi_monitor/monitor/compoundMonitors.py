@@ -1,7 +1,7 @@
 import datetime as _dt
 from typing import Optional as _Optional, List as _List, Union as _Union, Dict as _Dict, Any as _Any
 
-from ._monitorABC import IMonitor as _IMonitor
+from .singleMonitors import IMonitor as _IMonitor
 from ._utils import _utc_timestamp
 
 class CompoundMonitor(_IMonitor):
