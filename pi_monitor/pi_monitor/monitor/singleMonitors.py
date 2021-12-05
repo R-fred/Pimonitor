@@ -1,3 +1,4 @@
+from abc import ABCMeta as _ABCMeta, abstractmethod as _abstractmethod
 from dataclasses import dataclass as _dataclass, field as _field
 import datetime as _dt
 import re as _re
@@ -6,12 +7,36 @@ from typing import Dict as _Dict, List as _List, NamedTuple as _NamedTuple, Opti
 import psutil as _ps
 from psutil import Process as _proc, virtual_memory
 
-from ._monitorABC import IMonitor as _IMonitor
-from ._utils import _utc_timestamp, UpTimeData as _UpTimeData
+from ._utils import _utc_timestamp, UpTimeData as _UpTimeData, _uuid
 
 
 @_dataclass
-class Uptime(_IMonitor):
+class IMonitor(metaclass=_ABCMeta):
+    """Abstract interface class for all monitors.
+
+    Args:
+        metaclass ([type], optional): [description]. Defaults to ABCMeta.
+    """
+
+    id: str = _field(init=False, default_factory=_uuid, repr=True)
+    mtype: _Optional[str] = _field(init=False, default="IMonitor")
+    timestamp: float = _field(init=False, default=None,repr=True,
+                            metadata={"unit": "s",
+                            "description": "returned as seconds from 1970.01.01 00:00"})
+    was_run: bool = _field(init=False, default=False, repr=False)
+
+    @staticmethod
+    @_abstractmethod
+    def run(self):
+        pass
+
+    @_abstractmethod
+    def as_dict(self) -> _Dict[str, _Any]:
+        pass
+
+
+@_dataclass
+class Uptime(IMonitor):
     """[summary]
 
     Args:
@@ -82,7 +107,7 @@ class Uptime(_IMonitor):
 
 
 @_dataclass
-class CPU(_IMonitor):
+class CPU(IMonitor):
     """[summary]
 
     Args:
@@ -180,7 +205,7 @@ class CPU(_IMonitor):
 
 
 @_dataclass
-class Memory(_IMonitor):
+class Memory(IMonitor):
     """[summary]
 
     Args:
@@ -241,7 +266,7 @@ class Memory(_IMonitor):
 
 
 @_dataclass
-class Disk(_IMonitor):
+class Disk(IMonitor):
     """[summary]
 
     Args:
@@ -304,11 +329,10 @@ class Disk(_IMonitor):
             return output
         
         return False
-
-    
+ 
 
 @_dataclass
-class Process(_IMonitor):
+class Process(IMonitor):
     """Class to monitor processes. Can also be used to retrieve informatiin about a running process.
 
     Returns:
@@ -408,8 +432,8 @@ class Process(_IMonitor):
         
         return False
 
-
-class Network(_IMonitor):
+@_dataclass
+class Network(IMonitor):
     """Class to monitor processes. Can also be used to retrieve informatiin about a running process.
 
     Returns:
@@ -528,6 +552,27 @@ class Network(_IMonitor):
 
 
 _MONITORS = {"uptime": Uptime, "cpu": CPU, "memory": Memory, "disk": Disk, "process": Process, "network": Network}
+_MONITORTYPES = _MONITORS.keys()
+
+class MonitorFactory:
+    
+    @staticmethod
+    def build(monitor_type: str, *args, **kwargs) -> _Optional[IMonitor]:
+        output = None
+        try:
+            if monitor_type.lower() in _MONITORTYPES:
+                if len(args) > 0 or len(kwargs) > 0:
+                    output = _MONITORS[monitor_type.lower()]
+                    output = output(*args, **kwargs)
+                else:
+                    output = _MONITORS[monitor_type.lower()]
+                    output = output()
+        except:
+            raise
+        finally:
+            return output
+
+
 
 # ######### QUICK TESTS #########
 

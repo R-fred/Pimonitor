@@ -1,15 +1,19 @@
 import json as _json
 import os as _os
 from os.path import expanduser as _expanduser
+import os as _os
+import pprint as _pprint
 import re as _re
 import sys as _sys
 import time as _time
+from typing import Dict as _Dict, Any as _Any, Optional as _Optional, List as _List
 
 import click
+import toml as _toml
 
 from .monitor.agents import AgentBuilder as _AgentBuilder
 from .monitor.senders import SenderFactory as _SenderFactory
-from .monitor.singleMonitors import _MONITORS
+from .monitor.singleMonitors import _MONITORS, MonitorFactory as _MonitorFactory
 from .monitor.senders import _SENDERTYPES, _SENDERS
 
 # TODO: implement that --send-to-options can be read from environment variables and/or files instead of being given as string.
@@ -36,7 +40,14 @@ def cli(ctx):
 @click.option("--monitor-options", multiple=True)
 @click.option("--send-to", multiple=True)
 @click.option("--send-to-options", multiple=True)
+@click.option("--from-config-file", multiple=False, default=".pimonitor-config.toml")
 @click.pass_context
+# TODO:
+# 1. Change the behavior so that without arguments, the tool runs from a config with a predefined name.
+# default name .pimonitor-config.toml. Config files are toml and name should end in toml (?).
+# 2. sqlite sender by default
+# 3. always keep a buffer (sqlite db) with the last 2 weeks.
+# 4. by default, sqlite db only keeps 3 months worth of data.
 def run(ctx, interval, monitor, monitor_options, send_to, send_to_options, refresh_context_every):
 
     try:
@@ -60,16 +71,28 @@ def run(ctx, interval, monitor, monitor_options, send_to, send_to_options, refre
 
         if len(senders) == 0:
             click.echo("At least one sender is required.")
-            exit
+            raise SystemExit
+        # import os
+        # os._exit(0)
 
         #### CREATE AND RUN THE AGENT ####
         agent = None
         agent_builder = _AgentBuilder()
         sender_factory = _SenderFactory()
+        monitor_factory = _MonitorFactory()
+
+        #-> m_cnt = 0
+        #-> for m in monitors:
+        #-> agent_builder.add_monitor(_MONITORS[m]())
+        #->     m_cnt += 1
 
         m_cnt = 0
         for m in monitors:
-            agent_builder.add_monitor(_MONITORS[m]())
+            print(monitors_parameters)
+            params = _json.loads(monitors_parameters[m_cnt])
+            
+            monitor = monitor_factory.build(monitor_type=m, **params)
+            agent_builder.add_monitor(monitor)
             m_cnt += 1
         
         s_cnt = 0
@@ -110,7 +133,36 @@ def kill():
     _os.kill(int(pm_pid))
 
     click.echo("...pimonitor is now stopped.")
+
+@cli.command()
+@click.option("--username-password", nargs=1, help="Enter credentials as a string of the following format: 'username, password', e.g. 'testuser, testpassword'.")
+def set_rabbitmq_credentials(username_password: _Optional[str] = None):
     
+    if username_password != None:
+        _os.environ["PIMONITOR_RABBITMQ_PLAIN_CREDENTIALS"] = username_password
+    
+
+def read_toml(filepath: str) -> _Dict[str, _Any]:
+    # TODO: write a configuration handler class.
+    
+    try:
+        with open("Hello_xxx/settings.toml", encoding="utf-8") as f:
+            file = f.readlines()
+
+        file = "".join(file)
+
+        output = _toml.loads(file)
+        
+        # handle the rabbitmq credentials
+        senders_names = [_.lower() for _ in output["senders"].keys]
+        if 'rabbitmq' in senders_names:
+            ...
+        
+    except BaseException as e:
+        _pprint("Could not load the toml configuration file. Please check your config file.")
+        raise e
+        exit()
+
 
 
 if __name__ == '__main__':

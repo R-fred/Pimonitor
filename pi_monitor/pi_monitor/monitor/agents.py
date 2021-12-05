@@ -13,10 +13,10 @@ from typing import Dict as _Dict, List as _List, Any as _Any, Optional as _Optio
 
 # from rich.console import Console as _Console
 
-from ._monitorABC import IMonitor as _IMonitor
+#-> from ._monitorABC import IMonitor as _IMonitor
 from .senders import _ISender as _ISender
 from .contextdata import ContextData as _ContextData
-from .singleMonitors import _MONITORS
+from .singleMonitors import _MONITORS, IMonitor as _IMonitor
 
 
 class Agent(_Thread):
