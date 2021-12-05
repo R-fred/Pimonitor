@@ -48,7 +48,7 @@ def cli(ctx):
 # 2. sqlite sender by default
 # 3. always keep a buffer (sqlite db) with the last 2 weeks.
 # 4. by default, sqlite db only keeps 3 months worth of data.
-def run(ctx, interval, monitor, monitor_options, send_to, send_to_options, refresh_context_every):
+def run(ctx, interval, monitor, monitor_options, send_to, send_to_options, refresh_context_every, from_config_file):
 
     try:
         global senders
@@ -81,15 +81,12 @@ def run(ctx, interval, monitor, monitor_options, send_to, send_to_options, refre
         sender_factory = _SenderFactory()
         monitor_factory = _MonitorFactory()
 
-        #-> m_cnt = 0
-        #-> for m in monitors:
-        #-> agent_builder.add_monitor(_MONITORS[m]())
-        #->     m_cnt += 1
-
         m_cnt = 0
         for m in monitors:
-            print(monitors_parameters)
-            params = _json.loads(monitors_parameters[m_cnt])
+            if len(monitors_parameters) > 0:
+                params = _json.loads(monitors_parameters[m_cnt])
+            else:
+                params = {}
             
             monitor = monitor_factory.build(monitor_type=m, **params)
             agent_builder.add_monitor(monitor)
@@ -97,7 +94,6 @@ def run(ctx, interval, monitor, monitor_options, send_to, send_to_options, refre
         
         s_cnt = 0
         for s in senders:
-            print(senders_parameters)
             params = _json.loads(senders_parameters[s_cnt])
             
             sender = sender_factory.build(sender_type=s, **params)
@@ -121,6 +117,8 @@ def run(ctx, interval, monitor, monitor_options, send_to, send_to_options, refre
         if agent:
             agent.stop_agent()
         print("Unexpected error.")
+        print("Debugging data:")
+        print(f"m_cnt: {m_cnt}; len(monitors): {len(monitors)}; len(monitors_parameters): {len(monitors_parameters)}")
         raise e
 
 @cli.command()
