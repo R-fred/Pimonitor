@@ -30,6 +30,7 @@ class _ISender(metaclass=_ABCMeta):
     def send(self, message: _Any):
         pass
 
+
 # TODO: Implement
 class RESTSender(_ISender):# have REST API running separately and POST to the API, GET collects the information from POST
 
@@ -40,7 +41,7 @@ class RESTSender(_ISender):# have REST API running separately and POST to the AP
     def send(self, url: str = "localhost", port: int = 8000, message: str = "REST sender"):
         return f"Message sent on {url}:{port}. Message: {message}. Date and time: {str(_dt.datetime.now())}"
 
-# TODO: Implement
+
 class RabbitMQSender(_ISender):
 
     def __init__(self, queue: str = "default", host: str = "localhost", port: int = 5672, credentials: _Optional[_Tuple[str]] = None, keep_alive: _Union[int, float] = 600):
