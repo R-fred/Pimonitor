@@ -7,16 +7,18 @@ from abc import ABCMeta as _ABCMeta, abstractmethod as _abstractmethod
 from collections import deque as _deque
 import datetime as _dt
 import json as _json
+import os as _os
 from threading import Thread as _Thread, Event as _Event
 from time import sleep as _sleep
-from typing import Dict as _Dict, List as _List, Any as _Any, Optional as _Optional, Deque as _Deque, Union as _Union
+from typing import Dict as _Dict, List as _List, Any as _Any, Optional as _Optional, Deque as _Deque, Tuple as _Tuple, Union as _Union
 
 # from rich.console import Console as _Console
 
 #-> from ._monitorABC import IMonitor as _IMonitor
-from .senders import _ISender as _ISender
+from .senders import _ISender as _ISender, SQLiteSender as _SQLiteSender
 from .contextdata import ContextData as _ContextData
 from .singleMonitors import _MONITORS, IMonitor as _IMonitor
+from ._utils import HOMEDICT
 
 
 class Agent(_Thread):
@@ -50,6 +52,12 @@ class Agent(_Thread):
         check_classes = tuple(_MONITORS.values())
 
         try:
+            # check that pimonitor is not already running
+            run = self.is_running()
+            if run[0]:
+                print(f"pimonitor is already running. Close pimonitor before you continue")
+                print("To close pi monitor un the 'pimonitor kill' command")
+            
             while not self.event.is_set():
                 if self.reload_context_every != None:
                     if _dt.datetime.now().timestamp() >= (self.context_data.timestamp + self._contextdata_reload):
@@ -93,6 +101,10 @@ class Agent(_Thread):
 
     def stop_agent(self) -> None:
         self.event.set()
+        
+        # remove the file storing the process number
+        _os.remove(f"{HOMEDICT}/.pimonitor.pid")
+        
         return None
 
     # EXPLAIN: Functions needed to manage the agent's "memory".
@@ -115,6 +127,19 @@ class Agent(_Thread):
     #     finally:
     #         return output
 
+    def is_running(self) -> _Tuple:
+        pid_file_path = f"{HOMEDICT}/.pimonitor.pid"
+        pid_file_exists = _os.path.exists(path=pid_file_path)
+        
+        pid = None
+        if pid_file_exists:
+            try:
+                with open(pid_file_path, mode="r") as f:
+                    pid = f.readlines()[0]
+            except:
+                pid = None
+                
+        return (True, pid)
 
     def list_parts(self) -> _Dict[str, _List[_Any]]:
         return {"monitors": self.monitors, "senders": self.senders}
@@ -153,6 +178,12 @@ class AgentBuilder(_IAgentBuilder):
         self._product.monitors.append(monitor)
     
     def build(self) -> Agent:
+        # include buffer
+        local_memory = _SQLiteSender(databasepath=f"{HOMEDICT}/.pimonitor.buffer.sqlite", table_name="buffer")
+        self._product.senders.append(local_memory)
+        
+        # get product and reset
         product = self._product
         self.reset()
+        
         return product

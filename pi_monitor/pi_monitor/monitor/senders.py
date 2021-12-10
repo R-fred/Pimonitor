@@ -14,6 +14,7 @@ from uuid import uuid4 as _uuid4
 import pika as _pika
 from pika import BlockingConnection as _BlockingConnection
 
+from ._utils import HOMEDICT
 # from fastapi import FastAPI as _FastAPI
 # import uvicorn as _uvicorn
 # import zmq as _zmq
@@ -136,7 +137,7 @@ class FileSender(_ISender):
         self.file_path = filepath
 
         if self.file_path == None:
-            fpath = f'{_expanduser("~")}/{_pf.node()}_monitoring.txt'.replace(":", "-").replace(" ", "_")
+            fpath = f'{HOMEDICT}/{_pf.node()}_monitoring.txt'.replace(":", "-").replace(" ", "_")
             self.file_path = fpath
 
         self.append = append
@@ -168,7 +169,7 @@ class SQLiteSender(_ISender):
         node = _pf.node().replace(":", "_").replace(" ", "_").replace(".", "_").replace("-", "_")
 
         if self.database_name == None or len(databasepath) == 0:
-            fpath = f'{_expanduser("~")}/{node}_monitoring.sqlite'
+            fpath = f'{HOMEDICT}/{node}_monitoring.sqlite'
             self.database_name = fpath
         
         if self.table_name == None or len(self.table_name) == 0:

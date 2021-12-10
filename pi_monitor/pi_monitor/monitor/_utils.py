@@ -1,11 +1,14 @@
 from collections import namedtuple
 import datetime as dt
+from os.path import expanduser as _expanduser
 import re
 from typing import Any
 import uuid
 
 FileSizes = namedtuple("Filesizes", ["GB", "MB", "KB", "B"])
 UpTimeData = namedtuple(typename="UpTimeData", field_names=("days", "hours","minutes","seconds"))
+
+HOMEDICT = _expanduser("~")
 
 FILESIZES = FileSizes(GB=1024*1024*1024, MB=1024*1024, KB=1024, B=1)
 

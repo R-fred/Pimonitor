@@ -1,7 +1,5 @@
 import json as _json
 import os as _os
-from os.path import expanduser as _expanduser
-import os as _os
 import pprint as _pprint
 import re as _re
 import sys as _sys
@@ -15,10 +13,11 @@ from .monitor.agents import AgentBuilder as _AgentBuilder
 from .monitor.senders import SenderFactory as _SenderFactory
 from .monitor.singleMonitors import _MONITORS, MonitorFactory as _MonitorFactory
 from .monitor.senders import _SENDERTYPES, _SENDERS
+from .monitor._utils import HOMEDICT
 
 # TODO: implement that --send-to-options can be read from environment variables and/or files instead of being given as string.
 
-home_dict = _expanduser("~")
+home_dict = HOMEDICT
 
 senders = []
 senders_parameters = []
@@ -129,6 +128,10 @@ def kill():
         pm_pid = f.readlines()[0]
     
     _os.kill(int(pm_pid))
+    try:
+        _os.remove(f"{home_dict}/.pimonitor.pid")
+    except:
+        click.echo(".pimonitor.pid file already deleted.")
 
     click.echo("...pimonitor is now stopped.")
 
